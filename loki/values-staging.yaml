@@ -1,0 +1,101 @@
+# Loki v3.5.7 - Staging Configuration (SimpleScalable with Filesystem Storage)
+
+# Deployment mode - SimpleScalable for write/read/backend components
+deploymentMode: SimpleScalable
+
+loki:
+  auth_enabled: false
+
+  # Filesystem storage
+  storage:
+    bucketNames:
+      chunks: chunks
+      ruler: ruler
+      admin: admin
+    type: filesystem
+    filesystem:
+      directory: /loki/storage
+
+  # Schema configuration
+  schemaConfig:
+    configs:
+      - from: 2024-01-01
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  # Common config
+  commonConfig:
+    replication_factor: 1
+    ring:
+      kvstore:
+        store: inmemory
+
+  # Limits config
+  limits_config:
+    ingestion_rate_mb: 10
+    ingestion_burst_size_mb: 20
+    max_streams_per_user: 1000
+    max_entries_limit_per_query: 5000
+    volume_enabled: true
+
+# Disable single binary mode
+singleBinary:
+  enabled: false
+
+# Disable ruler to simplify deployment
+ruler:
+  enabled: false
+
+# Enable distributed components
+write:
+  enabled: true
+  replicas: 1
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClassName: standard-rwo
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+read:
+  enabled: true
+  replicas: 1
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClassName: standard-rwo
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+backend:
+  enabled: true
+  replicas: 1
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClassName: standard-rwo
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# Promtail disabled - using OpenTelemetry Collector for log collection
+promtail:
+  enabled: false

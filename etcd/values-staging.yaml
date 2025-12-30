@@ -1,0 +1,28 @@
+# etcd Bitnami Helm Chart - Staging Environment Values
+# Used with: helm repo add bitnami https://charts.bitnami.com/bitnami
+# Install with: helm install etcd bitnami/etcd -f values-staging.yaml
+
+# 3-member cluster for staging environment
+replicaCount: 3
+
+# Staging storage
+persistence:
+  enabled: true
+  size: 5Gi
+
+# Reduced resources for staging
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# PDB for staging (maintain quorum with 3 replicas)
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Staging log level
+logLevel: "info"

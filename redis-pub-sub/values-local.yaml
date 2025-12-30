@@ -1,0 +1,25 @@
+# Redis local development values
+appName: redis
+namespace: infrastructure
+replicaCount: 2
+
+# Smaller resources for local development
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Redis configuration for local
+redis:
+  loglevel: "notice"
+  maxmemory: "128mb"
+  maxmemoryPolicy: "allkeys-lru"
+  timeout: 300
+  tcpKeepalive: 300
+
+# Disable pod disruption budget for local single-node
+podDisruptionBudget:
+  minAvailable: 0

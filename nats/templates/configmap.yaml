@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.appName }}-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appName }}
+data:
+  nats.conf: |
+    # NATS Server Configuration
+
+    # Client connections
+    port: {{ .Values.ports.client }}
+
+    # HTTP monitoring
+    http_port: {{ .Values.ports.monitoring }}
+
+    # Cluster configuration
+    cluster {
+      name: {{ .Values.cluster.name }}
+      port: {{ .Values.ports.cluster }}
+
+      # Routes to all cluster members
+      routes: [
+        {{- $namespace := .Values.namespace }}
+        {{- $appName := .Values.appName }}
+        {{- $clusterPort := .Values.ports.cluster }}
+        {{- range $i := until (.Values.replicaCount | int) }}
+        nats://{{ $appName }}-{{ $i }}.{{ $appName }}.{{ $namespace }}.svc.cluster.local:{{ $clusterPort }}{{ if lt $i (sub ($.Values.replicaCount | int) 1) }},{{ end }}
+        {{- end }}
+      ]
+    }
+
+    # Logging
+    logtime: true
+    log_file: "/dev/stdout"
+    debug: {{ eq .Values.nats.logLevel "debug" | ternary "true" "false" }}
+    trace: {{ eq .Values.nats.logLevel "trace" | ternary "true" "false" }}
+
+    # Connection limits
+    max_connections: {{ .Values.nats.maxConnections }}
+    max_payload: {{ .Values.nats.maxPayload }}
+    write_deadline: {{ .Values.nats.writeDeadline | quote }}
+
+    # Performance tuning
+    max_control_line: 4096
+
+    # Liveness check
+    lame_duck_duration: "30s"

@@ -1,0 +1,60 @@
+# NATS Cluster - Default Values
+appName: nats
+namespace: infrastructure
+
+# NATS image
+image:
+  repository: nats
+  tag: "2.12.2-alpine"
+  pullPolicy: IfNotPresent
+
+# Number of NATS replicas
+replicaCount: 3
+
+# Cluster configuration
+cluster:
+  name: tradefence-nats
+
+# Container ports
+ports:
+  client: 4222
+  cluster: 6222
+  monitoring: 8222
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Liveness probe configuration
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Readiness probe configuration
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# NATS server configuration
+nats:
+  logLevel: "info"
+  maxConnections: "1000"
+  maxPayload: "1048576"
+  writeDeadline: "2s"
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Pod anti-affinity
+affinity: {}

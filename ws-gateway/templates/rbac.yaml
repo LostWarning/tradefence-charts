@@ -1,0 +1,40 @@
+---
+# ClusterRole for Kubernetes core resource access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.appName }}-core
+  labels:
+    app: {{ .Values.appName }}
+    version: {{ .Values.version }}
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for core resource access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.appName }}-core
+  labels:
+    app: {{ .Values.appName }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.appName }}-core
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.appName }}
+    namespace: {{ .Values.namespace }}
+

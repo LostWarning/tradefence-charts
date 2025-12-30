@@ -1,0 +1,24 @@
+# Redis production environment values
+appName: redis
+namespace: app
+
+# Production resources - higher allocation for stability
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Redis configuration for production
+redis:
+  loglevel: "notice"
+  maxmemory: "512mb"
+  maxmemoryPolicy: "allkeys-lru"
+  timeout: 300
+  tcpKeepalive: 300
+
+# Pod disruption budget
+podDisruptionBudget:
+  minAvailable: 0

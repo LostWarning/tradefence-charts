@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-alerts
+  namespace: monitoring
+data:
+  application-alerts.yaml: |
+    groups:
+    - name: application
+      interval: 30s
+      rules:
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (pod, namespace) (irate(container_cpu_usage_seconds_total{container!=""}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "Pod {{ "$" }}labels.pod }} in namespace {{ "$" }}labels.namespace }} is using {{ "$" }}value }}% CPU"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: |
+          (sum by (pod, namespace) (container_memory_working_set_bytes{container!=""}) / sum by (pod, namespace) (container_spec_memory_limit_bytes{container!=""})) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Pod {{ "$" }}labels.pod }} in namespace {{ "$" }}labels.namespace }} is using {{ "$" }}value }}% memory"
+
+      # Pod restart rate
+      - alert: PodRestartingFrequently
+        expr: |
+          rate(kube_pod_container_status_restarts_total[15m]) * 3600 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod restarting frequently"
+          description: "Pod {{ "$" }}labels.pod }} in namespace {{ "$" }}labels.namespace }} has restarted {{ "$" }}value }} times in the last hour"
+
+      # Pod not ready
+      - alert: PodNotReady
+        expr: |
+          sum by (namespace, pod) (kube_pod_status_phase{phase!="Running"}) > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod not ready"
+          description: "Pod {{ "$" }}labels.pod }} in namespace {{ "$" }}labels.namespace }} has been not ready for 10 minutes"
+
+      # Deployment replica mismatch
+      - alert: DeploymentReplicasMismatch
+        expr: |
+          kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Deployment replicas mismatch"
+          description: "Deployment {{ "$" }}labels.deployment }} in namespace {{ "$" }}labels.namespace }} has {{ "$" }}value }} replicas available, expected {{ "$" }}labels.spec_replicas }}"
+
+      # HPA at max replicas
+      - alert: HPAMaxedOut
+        expr: |
+          kube_horizontalpodautoscaler_status_current_replicas >= kube_horizontalpodautoscaler_spec_max_replicas
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HPA maxed out"
+          description: "HPA {{ "$" }}labels.horizontalpodautoscaler }} in namespace {{ "$" }}labels.namespace }} has reached maximum replicas"
+
+      # High request latency (example - requires custom metrics)
+      - alert: HighRequestLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency"
+          description: "Service {{ "$" }}labels.service }} has 95th percentile latency of {{ "$" }}value }}s"
+
+      # High error rate (example - requires custom metrics)
+      - alert: HighErrorRate
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])) by (service) / sum(rate(http_requests_total[5m])) by (service)) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate"
+          description: "Service {{ "$" }}labels.service }} has {{ "$" }}value }}% error rate"
+
+    - name: database
+      interval: 30s
+      rules:
+      # Database connection pool exhaustion
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          (sum by (instance) (pg_stat_database_numbackends) / sum by (instance) (pg_settings_max_connections)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "Database {{ "$" }}labels.instance }} is using {{ "$" }}value }}% of available connections"
+
+    - name: redis
+      interval: 30s
+      rules:
+      # Redis memory usage
+      - alert: RedisMemoryHigh
+        expr: |
+          (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis instance {{ "$" }}labels.instance }} is using {{ "$" }}value }}% of available memory"
+
+      # Redis connection spike
+      - alert: RedisConnectionSpike
+        expr: |
+          rate(redis_connected_clients[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis connection spike detected"
+          description: "Redis instance {{ "$" }}labels.instance }} has {{ "$" }}value }} new connections per second"

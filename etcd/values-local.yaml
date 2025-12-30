@@ -1,0 +1,53 @@
+# etcd Local Development Values
+appName: etcd
+namespace: infrastructure
+
+# Single replica for local single-node development
+# Set to 3 if you have multiple nodes (agent_count >= 2 in cluster config)
+replicaCount: 1
+
+# Minimal storage for local
+persistence:
+  enabled: true
+  size: 1Gi
+
+# Minimal resources for local development
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Readiness probe - increased timeouts for local development
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 10      # Increased from 5s
+  successThreshold: 1
+  failureThreshold: 30    # High threshold for local stability
+
+# Liveness probe
+livenessProbe:
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 10      # Increased from 5s
+  failureThreshold: 3
+
+# PDB disabled for single replica
+podDisruptionBudget:
+  enabled: false
+
+# Pod anti-affinity set to preferred (not required) for local single-node
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - etcd
+      topologyKey: kubernetes.io/hostname

@@ -1,0 +1,73 @@
+# API Gateway values for production deployment
+
+appName: event-hub
+namespace: app
+version: "1.0.0"
+environment: production
+# Docker image
+image:
+  repository: ghcr.io/lostwarning/event-hub
+  tag: main-1f5899f
+  pullPolicy: IfNotPresent
+# Replica count (HPA will override this)
+replicaCount: 10
+revisionHistoryLimit: 0
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+containerPort: 8080
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+# Horizontal Pod Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 10
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  scaleDownStabilization: 300
+  scaleUpStabilization: 0
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 5
+# Health checks
+livenessProbe:
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+readinessProbe:
+  path: /ready
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+# JWT/Auth configuration
+auth:
+  jwtSecret: "" # Should be injected from secret
+  tokenExpiry: 24h
+# Application configuration
+config:
+  logLevel: "INFO"
+rateLimiter:
+  enabled: true
+  type: "pod_ip"
+  rps: 1
+  burst: 5
+internalServices:
+  userServiceGRPC: user-service:9090
+  telemetryEndpoint: tempo.monitoring:4317
+  logEndpoint: http://loki-write.monitoring.svc.cluster.local:3100/loki/api/v1/push
+# Linkerd service mesh configuration
+linkerd:
+  inject: true

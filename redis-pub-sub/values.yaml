@@ -1,0 +1,83 @@
+# Redis StatefulSet default values
+appName: redis
+namespace: infrastructure
+version: "8.2"
+
+# Redis image
+image:
+  repository: redis
+  tag: "8.2-alpine"
+  pullPolicy: IfNotPresent
+
+# Number of independent Redis replicas
+replicaCount: 1
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 6379
+
+# Container port
+containerPort: 6379
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Health checks
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Redis configuration
+redis:
+  # Loglevel can be one of verbose, notice, warning
+  loglevel: "notice"
+
+  # Max memory policy: allkeys-lru, volatile-lru, etc.
+  maxmemory: "256mb"
+  maxmemoryPolicy: "allkeys-lru"
+
+  # Timeout for idle clients (0 = disabled)
+  timeout: 300
+
+  # TCP keepalive
+  tcpKeepalive: 300
+
+  # Custom redis.conf parameters
+  customConfig: {}
+    # Add custom redis configuration here
+    # Example:
+    # appendonly: "yes"
+    # appendfsync: "everysec"
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  minAvailable: 0
+
+# Pod anti-affinity for HA
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - redis
+        topologyKey: kubernetes.io/hostname

@@ -1,0 +1,82 @@
+# etcd Custom Deployment - Default Values
+appName: etcd
+namespace: infrastructure
+
+# etcd image
+image:
+  repository: quay.io/coreos/etcd
+  tag: v3.6.0
+  pullPolicy: IfNotPresent
+
+# Number of etcd replicas
+replicaCount: 3
+
+# Pod management policy for parallel startup
+podManagementPolicy: Parallel
+
+# Service configuration
+service:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+
+# Container ports
+ports:
+  client: 2379
+  server: 2380
+  metrics: 8080
+
+# Storage configuration
+persistence:
+  enabled: true
+  size: 1Gi
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Readiness probe
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 30
+
+# Liveness probe
+livenessProbe:
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Pod anti-affinity
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - etcd
+      topologyKey: kubernetes.io/hostname
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# etcd configuration
+etcd:
+  # Cluster token for initialization
+  clusterToken: "etcd-cluster"
+  # Initial cluster state (new for fresh cluster, existing for scaling)
+  initialClusterState: "new"
+  # Metrics configuration
+  listenMetricsUrls: "http://0.0.0.0:8080"

@@ -1,0 +1,25 @@
+# Redis staging environment values
+appName: redis
+namespace: infrastructure
+replicaCount: 2
+
+# Staging resources
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Redis configuration for staging
+redis:
+  loglevel: "notice"
+  maxmemory: "256mb"
+  maxmemoryPolicy: "allkeys-lru"
+  timeout: 300
+  tcpKeepalive: 300
+
+# Pod disruption budget
+podDisruptionBudget:
+  minAvailable: 1

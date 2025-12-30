@@ -1,0 +1,69 @@
+# Local k3d configuration for API Gateway
+
+appName: data-ingestion-service
+namespace: app
+environment: local
+# Docker image
+image:
+  repository: ghcr.io/lostwarning/data-ingestion-service
+  tag: main-9b7f10a
+  pullPolicy: IfNotPresent
+# Replica count (reduced for local)
+replicaCount: 2
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+# Container ports
+containerPort: 8080
+metricsPort: 9090
+# Resource limits and requests (reduced for local)
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+# Horizontal Pod Autoscaling (disabled for local)
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  scaleDownStabilization: 300
+  scaleUpStabilization: 0
+  # Custom metrics for WebSocket connections
+  customMetrics:
+    - name: websocket_connections_per_pod
+      targetAverageValue: "1000"
+# Pod Disruption Budget (disabled for local)
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+# Health checks
+livenessProbe:
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+readinessProbe:
+  path: /ready
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+redis:
+  host: "redis-0.redis-headless" # Local Redis service
+  port: 6379
+  maxConnections: 50
+  timeout: 5
+# Application configuration
+config:
+  logLevel: "DEBUG" # More verbose for local dev
+  custom: {}
+database:
+  postgres_1: "postgres://devuser:devpass@host.k3d.internal:5432/tradefence?sslmode=disable"
