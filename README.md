@@ -61,3 +61,5 @@ Open a PR against `main`. For chart/template changes include:
 - Any rollout/rollback notes for infra changes (CRDs, stateful sets, RBAC).
 
 If you'd like a GitHub Actions workflow that lints all charts or runs `helm template` checks, ask and I can add a minimal CI job.
+
+Test
