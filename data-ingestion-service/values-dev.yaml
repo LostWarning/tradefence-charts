@@ -5,8 +5,8 @@ namespace: app
 environment: local
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/data-ingestion-service
-  tag: main-9b7f10a
+  repository: registry.tradefence.in:5000/data-ingestion-service
+  tag: latest
   pullPolicy: IfNotPresent
 # Replica count (reduced for local)
 replicaCount: 2

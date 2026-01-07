@@ -5,8 +5,8 @@ namespace: app
 environment: local
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/data-repository
-  tag: main-c48c1f8
+  repository: registry.tradefence.in:5000/data-repository
+  tag: latest
   pullPolicy: IfNotPresent
 # Replica count (reduced for local)
 replicaCount: 2

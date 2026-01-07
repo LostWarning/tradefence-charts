@@ -5,8 +5,8 @@ namespace: app
 environment: local
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/notification-service
-  tag: main-3eb71f3
+  repository: registry.tradefence.in:5000/notification-service
+  tag: latest
   pullPolicy: IfNotPresent
 # Replica count (reduced for local)
 replicaCount: 2

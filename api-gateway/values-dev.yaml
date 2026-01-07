@@ -5,8 +5,8 @@ namespace: app
 environment: local
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/api-gateway
-  tag: main-a801e84
+  repository: registry.tradefence.in:5000/api-gateway
+  tag: latest
   pullPolicy: IfNotPresent
 # Replica count (reduced for local)
 replicaCount: 2
