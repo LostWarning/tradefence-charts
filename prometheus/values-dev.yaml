@@ -24,7 +24,7 @@ prometheus:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - prometheus.localhost
+      - prometheus.dev.tradefence.in
     paths:
       - /
     pathType: Prefix
@@ -130,11 +130,11 @@ grafana:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - grafana.localhost
+      - grafana.dev.tradefence.in
     tls:
-      - secretName: grafana-local-tls
+      - secretName: grafana-dev-tls
         hosts:
-          - grafana.localhost
+          - grafana.dev.tradefence.in
 
   # Dashboard providers
   dashboardProviders:
@@ -223,7 +223,7 @@ alertmanager:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - alertmanager.localhost
+      - alertmanager.dev.tradefence.in
     paths:
       - /
     pathType: Prefix
