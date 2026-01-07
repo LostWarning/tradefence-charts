@@ -1,0 +1,78 @@
+# Local development configuration for Traefik ingress controller
+
+deployment:
+  # Start with fewer replicas for local dev
+  replicas: 2
+
+
+# Port configuration
+ports:
+  web:
+    port: 80
+    expose:
+      default: true
+  websecure:
+    port: 443
+    expose:
+      default: true
+    http3:
+      enabled: false  # Disable for local dev
+    tls:
+      enabled: true
+
+# Service configuration
+service:
+  enabled: true
+  type: LoadBalancer
+
+# Ingress class
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+
+# Provider configuration
+providers:
+  kubernetesIngress:
+    namespaces: []  # Watch all namespaces
+
+# Additional arguments
+additionalArguments:
+  - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+  - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+  - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+  - "--entrypoints.websecure.http.tls=true"
+  - "--serversTransport.insecureSkipVerify=true"
+  # WebSocket timeout configuration for long-lived connections
+  - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=0"
+  - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=0"
+  - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=3600s"
+  - "--serversTransport.forwardingTimeouts.dialTimeout=30s"
+  - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=0"
+  - "--serversTransport.forwardingTimeouts.idleConnTimeout=3600s"
+  # Connection lifecycle
+  - "--entrypoints.websecure.transport.lifeCycle.requestAcceptGraceTimeout=0"
+  - "--entrypoints.websecure.transport.lifeCycle.graceTimeOut=30s"
+  # Logging
+  - "--accesslog=true"
+  - "--accesslog.format=json"
+
+# Local resource limits (smaller than production)
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Disable HPA for local
+autoscaling:
+  enabled: false
+
+# Logging
+logs:
+  general:
+    level: DEBUG  # More verbose for local dev
+  access:
+    enabled: true
+    format: json
