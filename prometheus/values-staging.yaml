@@ -26,11 +26,11 @@ prometheus:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
     hosts:
-      - prometheus.staging.yourdomain.com
+      - prometheus.staging.tradefence.in
     tls:
       - secretName: staging-prometheus-tls
         hosts:
-          - prometheus.staging.yourdomain.com
+          - prometheus.staging.tradefence.in
 
   prometheusSpec:
     # Single replica for staging
@@ -141,11 +141,11 @@ grafana:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - grafana.staging.yourdomain.com
+      - grafana.staging.tradefence.in
     tls:
       - secretName: staging-grafana-tls
         hosts:
-          - grafana.staging.yourdomain.com
+          - grafana.staging.tradefence.in
 
   # Dashboard providers
   dashboardProviders:
@@ -237,11 +237,11 @@ alertmanager:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
     hosts:
-      - alertmanager.staging.yourdomain.com
+      - alertmanager.staging.tradefence.in
     tls:
       - secretName: staging-alertmanager-tls
         hosts:
-          - alertmanager.staging.yourdomain.com
+          - alertmanager.staging.tradefence.in
 
   alertmanagerSpec:
     replicas: 2
