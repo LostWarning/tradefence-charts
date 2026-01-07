@@ -1,4 +1,4 @@
-# Loki v3.5.7 - Staging Configuration (SimpleScalable with Filesystem Storage)
+# Loki v3.5.7 - Local Development Configuration (Distributed with MinIO S3)
 
 # Deployment mode - SimpleScalable for write/read/backend components
 deploymentMode: SimpleScalable
@@ -6,38 +6,49 @@ deploymentMode: SimpleScalable
 loki:
   auth_enabled: false
 
-  # Filesystem storage
+  # Storage bucket configuration (REQUIRED for S3)
   storage:
     bucketNames:
-      chunks: chunks
-      ruler: ruler
-      admin: admin
-    type: filesystem
-    filesystem:
-      directory: /loki/storage
+      chunks: loki-logs
+      ruler: loki-logs
+      admin: loki-logs
+    type: s3
+    s3:
+      endpoint: http://host.k3d.internal:9000
+      insecure: true
+      s3ForcePathStyle: true
+      # WARNING: Hardcoded credentials for local development only
+      # Production/Staging should use Kubernetes secrets
+      secretAccessKey: admin12345
+      accessKeyId: admin
 
   # Schema configuration
   schemaConfig:
     configs:
       - from: 2024-01-01
         store: tsdb
-        object_store: filesystem
+        object_store: s3
         schema: v13
         index:
           prefix: loki_index_
           period: 24h
 
-  # Common config
+  # Common configuration for distributed mode
   commonConfig:
     replication_factor: 1
     ring:
       kvstore:
-        store: inmemory
+        store: etcd
+        etcd:
+          endpoints:
+            - "http://etcd-0.etcd.infrastructure.svc.cluster.local:2379"
+            - "http://etcd-1.etcd.infrastructure.svc.cluster.local:2379"
+            - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
 
   # Limits config
   limits_config:
-    ingestion_rate_mb: 10
-    ingestion_burst_size_mb: 20
+    ingestion_rate_mb: 5
+    ingestion_burst_size_mb: 10
     max_streams_per_user: 1000
     max_entries_limit_per_query: 5000
     volume_enabled: true
@@ -56,14 +67,14 @@ write:
   replicas: 1
   persistence:
     enabled: true
-    size: 50Gi
+    size: 5Gi
     storageClassName: standard-rwo
   resources:
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 512Mi
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 1Gi
 
 read:
@@ -71,14 +82,14 @@ read:
   replicas: 1
   persistence:
     enabled: true
-    size: 50Gi
+    size: 5Gi
     storageClassName: standard-rwo
   resources:
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 512Mi
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 1Gi
 
 backend:
@@ -86,14 +97,14 @@ backend:
   replicas: 1
   persistence:
     enabled: true
-    size: 50Gi
+    size: 5Gi
     storageClassName: standard-rwo
   resources:
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 512Mi
     limits:
-      cpu: 1000m
+      cpu: 500m
       memory: 1Gi
 
 # Promtail disabled - using OpenTelemetry Collector for log collection
