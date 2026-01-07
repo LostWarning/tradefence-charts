@@ -61,14 +61,14 @@ ingress:
   enabled: true
   ingressClassName: traefik
   hosts:
-    - host: api.tradefence.in
+    - host: api.dev.tradefence.in
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: api-tradefence-tls
       hosts:
-        - api.tradefence.in
+        - api.dev.tradefence.in
   annotations:
     # WebSocket sticky sessions
     traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
