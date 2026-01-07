@@ -1,20 +1,21 @@
-# Staging configuration for Prometheus stack
+# Local k3d configuration for Prometheus stack
 
 # Prometheus Operator
 prometheusOperator:
+  # Disable admission webhooks to speed up deployment (safe for local dev)
   admissionWebhooks:
-    enabled: true
+    enabled: false
     patch:
-      enabled: true
+      enabled: false
   tls:
-    enabled: true
+    enabled: false
   resources:
     limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 250m
+      cpu: 200m
       memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
 
 # Prometheus
 prometheus:
@@ -22,71 +23,60 @@ prometheus:
   ingress:
     enabled: true
     ingressClassName: traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
     hosts:
       - prometheus.staging.tradefence.in
-    tls:
-      - secretName: staging-prometheus-tls
-        hosts:
-          - prometheus.staging.tradefence.in
+    paths:
+      - /
+    pathType: Prefix
 
   prometheusSpec:
-    # Single replica for staging
+    # Single replica for local
     replicas: 1
 
-    # Retention (reduced for staging)
-    retention: 15d
-    retentionSize: "90GB"
+    # Short retention for local dev
+    retention: 7d
+    retentionSize: "10GB"
 
-    # Resources (reduced for staging)
+    # Reduced resources for local
     resources:
       requests:
-        cpu: 1000m
-        memory: 4Gi
+        cpu: 100m
+        memory: 1Gi
       limits:
-        cpu: 2000m
-        memory: 8Gi
+        cpu: 500m
+        memory: 2Gi
 
-    # Storage (reduced for staging)
+    # Small storage for local
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: standard-rwo
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 100Gi
+              storage: 20Gi
 
     # Service monitors
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
-
-    # Additional scrape configs for custom metrics
-    additionalScrapeConfigs: []
-
-    # Pod anti-affinity
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - prometheus
-            topologyKey: kubernetes.io/hostname
 
 # Grafana
 grafana:
   enabled: true
   replicas: 1
 
-  # Admin password (should be changed or use secret)
-  adminPassword: "CHANGE-ME-IN-STAGING"
+  # Default admin password for local dev
+  adminPassword: "admin"
+
+  # Security context for Grafana
+  securityContext:
+    runAsUser: 472
+    runAsGroup: 472
+    fsGroup: 472
+    runAsNonRoot: false  # Allow init container to run as root
+
+  # Init container configuration
+  initChownData:
+    enabled: false
 
   # Disable auto-generated datasource since we provide explicit ones
   sidecar:
@@ -121,29 +111,28 @@ grafana:
             derivedFields: []
           secureJsonData: {}
 
-  # Resources (reduced for staging)
+  # Reduced resources
   resources:
     limits:
-      cpu: 500m
+      cpu: 200m
       memory: 1Gi
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 512Mi
 
-  # Persistence
+  # Persistence for local
   persistence:
     enabled: true
-    storageClassName: standard-rwo
     size: 5Gi
 
-  # Ingress
+  # Ingress for local
   ingress:
     enabled: true
     ingressClassName: traefik
     hosts:
       - grafana.staging.tradefence.in
     tls:
-      - secretName: staging-grafana-tls
+      - secretName: grafana-staging-tls
         hosts:
           - grafana.staging.tradefence.in
 
@@ -233,19 +222,17 @@ alertmanager:
   ingress:
     enabled: true
     ingressClassName: traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
     hosts:
       - alertmanager.staging.tradefence.in
-    tls:
-      - secretName: staging-alertmanager-tls
-        hosts:
-          - alertmanager.staging.tradefence.in
+    paths:
+      - /
+    pathType: Prefix
 
   alertmanagerSpec:
-    replicas: 2
+    # Single replica for local
+    replicas: 1
 
+    # Minimal resources
     resources:
       requests:
         cpu: 50m
@@ -254,16 +241,16 @@ alertmanager:
         cpu: 200m
         memory: 256Mi
 
+    # Small storage
     storage:
       volumeClaimTemplate:
         spec:
-          storageClassName: standard-rwo
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
               storage: 5Gi
 
-    # Alert routing configuration
+    # Basic alert config
     config:
       global:
         resolve_timeout: 5m
@@ -279,9 +266,8 @@ alertmanager:
           receiver: 'null'
       receivers:
       - name: 'null'
-      # Add your receivers here (email, slack, pagerduty, etc.)
 
-# Node exporter
+# Node exporter - minimal for local
 nodeExporter:
   enabled: true
   resources:
@@ -292,7 +278,7 @@ nodeExporter:
       cpu: 50m
       memory: 32Mi
 
-# Kube state metrics
+# Kube state metrics - minimal for local
 kubeStateMetrics:
   enabled: true
   resources:
