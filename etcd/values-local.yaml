@@ -24,15 +24,15 @@ resources:
 readinessProbe:
   initialDelaySeconds: 10
   periodSeconds: 5
-  timeoutSeconds: 10      # Increased from 5s
+  timeoutSeconds: 10 # Increased from 5s
   successThreshold: 1
-  failureThreshold: 30    # High threshold for local stability
+  failureThreshold: 30 # High threshold for local stability
 
 # Liveness probe
 livenessProbe:
   initialDelaySeconds: 15
   periodSeconds: 10
-  timeoutSeconds: 10      # Increased from 5s
+  timeoutSeconds: 10 # Increased from 5s
   failureThreshold: 3
 
 # PDB disabled for single replica
@@ -43,11 +43,12 @@ podDisruptionBudget:
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - etcd
-      topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - etcd
+          topologyKey: kubernetes.io/hostname
