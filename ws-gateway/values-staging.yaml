@@ -67,7 +67,7 @@ readinessProbe:
   failureThreshold: 3
 
 redis:
-  host: "redis-0.redis-headless"  # Local Redis service
+  host: "redis-0.redis-headless" # Local Redis service
   port: 6379
   maxConnections: 50
   timeout: 5
@@ -93,7 +93,7 @@ grpc:
 
 # JWT/Auth configuration
 auth:
-  jwtSecret: ""  # Should be injected from secret
+  jwtSecret: "" # Should be injected from secret
   tokenExpiry: 24h
 
 # Application configuration
@@ -101,7 +101,7 @@ config:
   logLevel: "INFO"
   websocketReadBufferSize: 4096
   websocketWriteBufferSize: 4096
-  websocketMaxMessageSize: 1048576  # 1MB
+  websocketMaxMessageSize: 1048576 # 1MB
   custom: {}
 
 # Ingress configuration
@@ -109,19 +109,14 @@ ingress:
   enabled: true
   ingressClassName: traefik
   hosts:
-    - host: api.staging.tradefence.com
+    - host: ws.staging.tradefence.in
       paths:
         - path: /
-          pathType: Prefix
-    - host: ws.staging.tradefence.com
-      paths:
-        - path: /ws
           pathType: Prefix
   tls:
     - secretName: staging-tradefence-tls
       hosts:
-        - api.staging.tradefence.com
-        - ws.staging.tradefence.com
+        - ws.staging.tradefence.in
   annotations:
     # WebSocket sticky sessions
     traefik.ingress.kubernetes.io/service.sticky.cookie: "true"

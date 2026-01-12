@@ -66,19 +66,14 @@ ingress:
   enabled: true
   ingressClassName: traefik
   hosts:
-    - host: api.staging.tradefence.com
+    - host: api.staging.tradefence.in
       paths:
         - path: /
-          pathType: Prefix
-    - host: ws.staging.tradefence.com
-      paths:
-        - path: /ws
           pathType: Prefix
   tls:
     - secretName: staging-tradefence-tls
       hosts:
-        - api.staging.tradefence.com
-        - ws.staging.tradefence.com
+        - api.staging.tradefence.in
   annotations:
     # WebSocket sticky sessions
     traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
