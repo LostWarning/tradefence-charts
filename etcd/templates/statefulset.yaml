@@ -81,7 +81,7 @@ spec:
         - --advertise-client-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):{{ .Values.ports.client }}
         - --initial-cluster-state={{ .Values.etcd.initialClusterState }}
         - --initial-cluster-token=etcd-$(K8S_NAMESPACE)
-        - --initial-cluster=etcd-0=$(URI_SCHEME)://etcd-0.$(SERVICE_NAME):{{ .Values.ports.server }},etcd-1=$(URI_SCHEME)://etcd-1.$(SERVICE_NAME):{{ .Values.ports.server }},etcd-2=$(URI_SCHEME)://etcd-2.$(SERVICE_NAME):{{ .Values.ports.server }}
+        - --initial-cluster={{ range $i, $e := until (int .Values.replicaCount) }}{{ if $i }},{{ end }}etcd-{{ $i }}=$(URI_SCHEME)://etcd-{{ $i }}.$(SERVICE_NAME):{{ $.Values.ports.server }}{{ end }}
         - --initial-advertise-peer-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):{{ .Values.ports.server }}
         - --listen-metrics-urls={{ .Values.etcd.listenMetricsUrls }}
         resources:

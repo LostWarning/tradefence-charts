@@ -9,7 +9,7 @@ image:
   pullPolicy: IfNotPresent
 
 # Number of etcd replicas
-replicaCount: 3
+replicaCount: 1
 
 # Pod management policy for parallel startup
 podManagementPolicy: Parallel
@@ -58,14 +58,16 @@ livenessProbe:
 # Pod anti-affinity
 affinity:
   podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - etcd
-      topologyKey: kubernetes.io/hostname
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - etcd
+          topologyKey: kubernetes.io/hostname
 
 # Pod Disruption Budget
 podDisruptionBudget:
