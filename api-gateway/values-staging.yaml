@@ -6,7 +6,7 @@ environment: staging
 
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/api-gateway
+  repository: registry.tradefence.in:5000/api-gateway
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -54,7 +54,7 @@ readinessProbe:
 
 # JWT/Auth configuration
 auth:
-  jwtSecret: ""  # Should be injected from secret
+  jwtSecret: "" # Should be injected from secret
   tokenExpiry: 24h
 
 # Application configuration
