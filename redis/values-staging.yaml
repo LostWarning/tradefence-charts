@@ -5,10 +5,10 @@ namespace: app
 # Staging resources
 resources:
   limits:
-    cpu: 500m
+    cpu: 250m
     memory: 512Mi
   requests:
-    cpu: 250m
+    cpu: 50m
     memory: 256Mi
 
 # Redis configuration for staging

@@ -26,10 +26,10 @@ metricsPort: 9090
 # Resource limits and requests (between local and production)
 resources:
   limits:
-    cpu: 1000m
+    cpu: 500m
     memory: 1Gi
   requests:
-    cpu: 500m
+    cpu: 100m
     memory: 512Mi
 
 # Horizontal Pod Autoscaling
@@ -67,7 +67,7 @@ readinessProbe:
   failureThreshold: 3
 
 redis:
-  host: "redis-0.redis-headless"  # Local Redis service
+  host: "redis-0.redis-headless" # Local Redis service
   port: 6379
   maxConnections: 50
   timeout: 5
@@ -76,4 +76,3 @@ redis:
 config:
   logLevel: "INFO"
   custom: {}
-

@@ -16,10 +16,10 @@ replicaCount: 3
 # Resource limits and requests (between local and production)
 resources:
   limits:
-    cpu: 1000m
+    cpu: 500m
     memory: 1Gi
   requests:
-    cpu: 500m
+    cpu: 100m
     memory: 512Mi
 
 # Horizontal Pod Autoscaling
@@ -54,7 +54,7 @@ readinessProbe:
 
 # JWT/Auth configuration
 auth:
-  jwtSecret: ""  # Should be injected from secret
+  jwtSecret: "" # Should be injected from secret
   tokenExpiry: 24h
 
 # Application configuration

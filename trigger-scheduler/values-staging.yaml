@@ -26,10 +26,10 @@ healthPort: 8080
 # Resource limits and requests (between local and production)
 resources:
   limits:
-    cpu: 1000m
+    cpu: 500m
     memory: 1Gi
   requests:
-    cpu: 500m
+    cpu: 100m
     memory: 512Mi
 
 # Horizontal Pod Autoscaling
@@ -76,4 +76,3 @@ internalServices:
 # Linkerd service mesh configuration
 linkerd:
   inject: true
-

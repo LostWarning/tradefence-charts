@@ -26,10 +26,10 @@ healthPort: 8080
 # Resource limits and requests (between local and production)
 resources:
   limits:
-    cpu: 1000m
+    cpu: 500m
     memory: 1Gi
   requests:
-    cpu: 500m
+    cpu: 100m
     memory: 512Mi
 
 # Horizontal Pod Autoscaling
@@ -65,7 +65,7 @@ readinessProbe:
 # Redis configuration for session management (staging Memorystore)
 redis:
   enabled: true
-  host: ""  # Will be populated from Terraform output
+  host: "" # Will be populated from Terraform output
   port: 6379
   db: 0
   maxConnections: 75
@@ -75,5 +75,3 @@ redis:
 config:
   logLevel: "INFO"
   custom: {}
-
-

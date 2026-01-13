@@ -26,10 +26,10 @@ metricsPort: 9090
 # Resource limits and requests (reduced for staging)
 resources:
   limits:
-    cpu: 1000m
+    cpu: 500m
     memory: 2Gi
   requests:
-    cpu: 500m
+    cpu: 100m
     memory: 1Gi
 
 # Horizontal Pod Autoscaling (ENABLED for dynamic stock-based routing)
@@ -69,10 +69,10 @@ readinessProbe:
 # Database configuration
 database:
   enabled: true
-  host: ""  # Cloud SQL private IP (from Terraform output)
+  host: "" # Cloud SQL private IP (from Terraform output)
   port: 5432
   name: tradefence
-  poolSize: 20  # Per pod connection pool (20 pods × 20 = 400 connections)
+  poolSize: 20 # Per pod connection pool (20 pods × 20 = 400 connections)
   maxOverflow: 5
   poolTimeout: 30
   migrations:
@@ -82,7 +82,7 @@ database:
 # Redis configuration
 redis:
   enabled: true
-  host: ""  # Memorystore private IP (from Terraform output)
+  host: "" # Memorystore private IP (from Terraform output)
   port: 6379
   db: 0
   maxConnections: 30
@@ -97,8 +97,8 @@ stockRouting:
   stockToPodKey: "stock:{symbol}:pods"
   podToStockKey: "pod:{name}:stocks"
   podHeartbeatKey: "pod:{name}:alive"
-  heartbeatTTL: 10  # seconds
-  heartbeatInterval: 5  # seconds
+  heartbeatTTL: 10 # seconds
+  heartbeatInterval: 5 # seconds
 
 # Application configuration
 config:
