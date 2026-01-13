@@ -4,7 +4,6 @@ deployment:
   # Start with fewer replicas for local dev
   replicas: 2
 
-
 # Port configuration
 ports:
   web:
@@ -16,7 +15,7 @@ ports:
     expose:
       default: true
     http3:
-      enabled: false  # Disable for local dev
+      enabled: false # Disable for local dev
     tls:
       enabled: true
 
@@ -33,7 +32,7 @@ ingressClass:
 # Provider configuration
 providers:
   kubernetesIngress:
-    namespaces: []  # Watch all namespaces
+    namespaces: [] # Watch all namespaces
 
 # Additional arguments
 additionalArguments:
@@ -72,7 +71,7 @@ autoscaling:
 # Logging
 logs:
   general:
-    level: DEBUG  # More verbose for local dev
+    level: DEBUG # More verbose for local dev
   access:
     enabled: true
     format: json

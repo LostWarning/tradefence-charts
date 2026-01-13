@@ -6,7 +6,7 @@ environment: staging
 
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/notification-service
+  repository: registry.tradefence.in:5000/notification-service
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -76,4 +76,3 @@ internalServices:
 # Linkerd service mesh configuration
 linkerd:
   inject: true
-
