@@ -6,7 +6,7 @@ environment: staging
 
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/trigger-scheduler
+  repository: registry.tradefence.in:5000/trigger-scheduler
   tag: latest
   pullPolicy: IfNotPresent
 
