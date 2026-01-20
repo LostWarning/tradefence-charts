@@ -1,6 +1,0 @@
-apiVersion: v2
-name: application-template
-description: Reusable Helm chart template for TradeFence applications
-type: application
-version: 1.0.0
-appVersion: "1.0"

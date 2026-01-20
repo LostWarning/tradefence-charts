@@ -1,4 +1,4 @@
-# Loki v3.5.7 - Local Development Configuration (Distributed with MinIO S3)
+# Loki v3.6.3 - Local Development Configuration (Distributed with MinIO S3)
 
 # Deployment mode - SimpleScalable for write/read/backend components
 deploymentMode: SimpleScalable

@@ -2,5 +2,5 @@ apiVersion: v2
 name: prometheus-alerts
 description: Custom Prometheus alert rules for application and infrastructure monitoring
 type: application
-version: 1.0.0
-appVersion: "1.0"
+version: 0.88.0
+appVersion: "v0.88.0"

@@ -1,4 +1,4 @@
-# Loki v3.5.7 - Production Configuration (SimpleScalable with Filesystem Storage)
+# Loki v3.6.3 - Production Configuration (SimpleScalable with Filesystem Storage)
 
 # Deployment mode - SimpleScalable for write/read/backend components
 deploymentMode: SimpleScalable
