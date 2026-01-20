@@ -1,6 +1,6 @@
 # Redis StatefulSet default values
 appName: redis
-namespace: app
+namespace: infrastructure
 version: "8.2"
 
 # Redis image
@@ -72,12 +72,12 @@ podDisruptionBudget:
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - redis
-        topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - redis
+          topologyKey: kubernetes.io/hostname

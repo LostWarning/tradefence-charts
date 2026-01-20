@@ -72,7 +72,7 @@ grafana:
     runAsUser: 472
     runAsGroup: 472
     fsGroup: 472
-    runAsNonRoot: false  # Allow init container to run as root
+    runAsNonRoot: false # Allow init container to run as root
 
   # Init container configuration
   initChownData:
@@ -98,7 +98,7 @@ grafana:
           type: tempo
           access: proxy
           orgId: 1
-          url: http://tempo:3100
+          url: http://tempo:3200
           editable: true
         - name: Loki
           type: loki
@@ -141,14 +141,14 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: 'default'
-        orgId: 1
-        folder: ''
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/default
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
 
   # Load default dashboards
   dashboards:
@@ -255,17 +255,17 @@ alertmanager:
       global:
         resolve_timeout: 5m
       route:
-        group_by: ['alertname', 'cluster', 'service']
+        group_by: ["alertname", "cluster", "service"]
         group_wait: 10s
         group_interval: 10s
         repeat_interval: 12h
-        receiver: 'null'
+        receiver: "null"
         routes:
-        - match:
-            alertname: Watchdog
-          receiver: 'null'
+          - match:
+              alertname: Watchdog
+            receiver: "null"
       receivers:
-      - name: 'null'
+        - name: "null"
 
 # Node exporter - minimal for local
 nodeExporter:
@@ -288,5 +288,4 @@ kubeStateMetrics:
     requests:
       cpu: 50m
       memory: 64Mi
-
 # Tempo is deployed separately via ArgoCD Application

@@ -26,7 +26,7 @@ grafana:
           type: tempo
           access: proxy
           orgId: 1
-          url: http://tempo:3100
+          url: http://tempo:3200
           isDefault: false
           editable: true
         - name: Loki
@@ -37,19 +37,19 @@ grafana:
           isDefault: false
           editable: true
 
-# Grafana dashboards
+  # Grafana dashboards
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: 'default'
-        orgId: 1
-        folder: ''
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/default
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
 
   dashboards:
     default:

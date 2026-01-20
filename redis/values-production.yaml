@@ -1,6 +1,6 @@
 # Redis production environment values
 appName: redis
-namespace: app
+namespace: infrastructure
 
 # Production resources - higher allocation for stability
 resources:

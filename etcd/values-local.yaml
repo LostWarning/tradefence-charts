@@ -4,7 +4,7 @@ namespace: infrastructure
 
 # Single replica for local single-node development
 # Set to 3 if you have multiple nodes (agent_count >= 2 in cluster config)
-replicaCount: 1
+replicaCount: 3
 
 # Minimal storage for local
 persistence:

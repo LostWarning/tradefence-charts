@@ -5,18 +5,18 @@ namespace: app
 environment: local
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/api-gateway
-  tag: main-a801e84
-  pullPolicy: IfNotPresent
+  repository: k3d-registry.localhost:5000/api-gateway
+  tag: latest
+  pullPolicy: Always
 # Replica count (reduced for local)
 replicaCount: 2
 # Resource limits and requests (reduced for local)
 resources:
   limits:
-    cpu: 500m
+    cpu: 1000m
     memory: 512Mi
   requests:
-    cpu: 250m
+    cpu: 100m
     memory: 256Mi
 # Horizontal Pod Autoscaling (disabled for local)
 autoscaling:

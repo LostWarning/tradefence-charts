@@ -19,7 +19,7 @@ loki:
       s3ForcePathStyle: true
       # WARNING: Hardcoded credentials for local development only
       # Production/Staging should use Kubernetes secrets
-      secretAccessKey: admin12345
+      secretAccessKey: password123
       accessKeyId: admin
 
   # Schema configuration

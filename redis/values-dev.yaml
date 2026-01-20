@@ -1,6 +1,6 @@
 # Redis local development values
 appName: redis
-namespace: app
+namespace: infrastructure
 
 # Smaller resources for local development
 resources:

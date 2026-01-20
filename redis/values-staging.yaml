@@ -1,6 +1,6 @@
 # Redis staging environment values
 appName: redis
-namespace: app
+namespace: infrastructure
 
 # Staging resources
 resources:

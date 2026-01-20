@@ -70,15 +70,15 @@ prometheus:
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - prometheus
-            topologyKey: kubernetes.io/hostname
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - prometheus
+              topologyKey: kubernetes.io/hostname
 
 # Grafana
 grafana:
@@ -108,7 +108,7 @@ grafana:
           type: tempo
           access: proxy
           orgId: 1
-          url: http://tempo:3100
+          url: http://tempo:3200
           editable: true
         - name: Loki
           type: loki
@@ -152,14 +152,14 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: 'default'
-        orgId: 1
-        folder: ''
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/default
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
 
   # Load default dashboards
   dashboards:
@@ -268,17 +268,17 @@ alertmanager:
       global:
         resolve_timeout: 5m
       route:
-        group_by: ['alertname', 'cluster', 'service']
+        group_by: ["alertname", "cluster", "service"]
         group_wait: 10s
         group_interval: 10s
         repeat_interval: 12h
-        receiver: 'null'
+        receiver: "null"
         routes:
-        - match:
-            alertname: Watchdog
-          receiver: 'null'
+          - match:
+              alertname: Watchdog
+            receiver: "null"
       receivers:
-      - name: 'null'
+        - name: "null"
       # Add your receivers here (email, slack, pagerduty, etc.)
 
 # Node exporter
@@ -302,5 +302,4 @@ kubeStateMetrics:
     requests:
       cpu: 100m
       memory: 128Mi
-
 # Tempo is deployed separately via ArgoCD Application
