@@ -1,13 +1,13 @@
-# API Gateway values for production deployment
+# API Gateway values for local deployment
 
 appName: data-ingestion-service
 namespace: app
-version: "1.0.0"
-environment: production
+version: "0.1.0-alpha.1"
+environment: local
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/data-ingestion-service
-  tag: main-9b7f10a
+  repository: registry.tradefence.in:5000/data-ingestion-service
+  tag: latest
   pullPolicy: IfNotPresent
 # Replica count (HPA will override this)
 replicaCount: 10

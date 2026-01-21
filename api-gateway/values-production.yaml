@@ -4,29 +4,14 @@ appName: api-gateway
 namespace: app
 environment: production
 
-# Docker image
-image:
-  repository: ghcr.io/lostwarning/api-gateway
-  tag: latest
-  pullPolicy: IfNotPresent
-
-# Replica count (HPA will override this)
-replicaCount: 10
-
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 2000m
-    memory: 2Gi
-  requests:
-    cpu: 1000m
-    memory: 1Gi
+# Replica count
+replicaCount: 3
 
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: true
-  minReplicas: 10
-  maxReplicas: 50
+  minReplicas: 3
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
@@ -35,50 +20,21 @@ autoscaling:
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 5
-
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-# JWT/Auth configuration
-auth:
-  jwtSecret: ""  # Should be injected from secret
-  tokenExpiry: 24h
-
-# Application configuration
-config:
-  logLevel: "INFO"
+  minAvailable: 3
 
 # Ingress configuration
 ingress:
   enabled: true
   ingressClassName: traefik
   hosts:
-    - host: api.tradefence.com
+    - host: api.tradefence.in
       paths:
         - path: /
           pathType: Prefix
-    - host: ws.tradefence.com
-      paths:
-        - path: /ws
-          pathType: Prefix
   tls:
-    - secretName: tradefence-tls
+    - secretName: api-tradefence-tls
       hosts:
-        - api.tradefence.com
-        - ws.tradefence.com
+        - api.tradefence.in
   annotations:
     # WebSocket sticky sessions
     traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
@@ -86,6 +42,11 @@ ingress:
     traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
+
 # Linkerd service mesh configuration
 linkerd:
   inject: true
+
+# Application configuration
+config:
+  logLevel: "INFO"

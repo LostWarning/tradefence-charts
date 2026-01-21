@@ -4,29 +4,11 @@ appName: api-gateway
 namespace: app
 environment: staging
 
-# Docker image
-image:
-  repository: registry.tradefence.in:5000/api-gateway
-  tag: latest
-  pullPolicy: IfNotPresent
-
-# Replica count (HPA will override this)
-replicaCount: 3
-
-# Resource limits and requests (between local and production)
-resources:
-  limits:
-    cpu: 500m
-    memory: 1Gi
-  requests:
-    cpu: 100m
-    memory: 512Mi
-
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: true
-  minReplicas: 3
-  maxReplicas: 20
+  minReplicas: 2
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
@@ -36,30 +18,6 @@ autoscaling:
 podDisruptionBudget:
   enabled: true
   minAvailable: 2
-
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-# JWT/Auth configuration
-auth:
-  jwtSecret: "" # Should be injected from secret
-  tokenExpiry: 24h
-
-# Application configuration
-config:
-  logLevel: "INFO"
 
 # Ingress configuration
 ingress:
@@ -81,6 +39,11 @@ ingress:
     traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
+
 # Linkerd service mesh configuration
 linkerd:
   inject: true
+
+# Application configuration
+config:
+  logLevel: "INFO"

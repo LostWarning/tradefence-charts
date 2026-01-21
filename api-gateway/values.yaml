@@ -1,44 +1,52 @@
-# API Gateway values for production deployment
+# API Gateway values for local deployment
 
 appName: api-gateway
 namespace: app
-version: "1.0.0"
-environment: production
+version: "0.1.0-alpha.1"
+environment: local
+
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/api-gateway
-  tag: main-a801e84
+  repository: registry.tradefence.in:5000/api-gateway
+  tag: latest
   pullPolicy: IfNotPresent
-# Replica count (HPA will override this)
-replicaCount: 10
+
 revisionHistoryLimit: 0
+
+# Replica count
+replicaCount: 2
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Horizontal Pod Autoscaling
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  scaleDownStabilization: 300
+  scaleUpStabilization: 0
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
 # Service configuration
 service:
   type: ClusterIP
   port: 8080
   targetPort: 8080
 containerPort: 8080
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 2000m
-    memory: 2Gi
-  requests:
-    cpu: 1000m
-    memory: 1Gi
-# Horizontal Pod Autoscaling
-autoscaling:
-  enabled: true
-  minReplicas: 10
-  maxReplicas: 50
-  targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 80
-  scaleDownStabilization: 300
-  scaleUpStabilization: 0
-# Pod Disruption Budget
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 5
+
 # Health checks
 livenessProbe:
   path: /health
@@ -52,10 +60,32 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
-# JWT/Auth configuration
-auth:
-  jwtSecret: "" # Should be injected from secret
-  tokenExpiry: 24h
+
+# Ingress configuration
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - host: api.local.tradefence.in
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: api-local-tradefence-tls
+      hosts:
+        - api.local.tradefence.in
+  annotations:
+    # WebSocket sticky sessions
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "gateway-session"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
+
+# Linkerd service mesh configuration
+linkerd:
+  inject: true
+
 # Application configuration
 config:
   logLevel: "INFO"
@@ -68,31 +98,3 @@ internalServices:
   userServiceGRPC: user-service:9090
   telemetryEndpoint: tempo.monitoring:4317
   logEndpoint: http://loki-write.monitoring.svc.cluster.local:3100/loki/api/v1/push
-# Ingress configuration
-ingress:
-  enabled: true
-  ingressClassName: traefik
-  hosts:
-    - host: api.yourdomain.com
-      paths:
-        - path: /
-          pathType: Prefix
-    - host: ws.yourdomain.com
-      paths:
-        - path: /ws
-          pathType: Prefix
-  tls:
-    - secretName: api-tls
-      hosts:
-        - api.yourdomain.com
-        - ws.yourdomain.com
-  annotations:
-    # WebSocket sticky sessions
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "gateway-session"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
-# Linkerd service mesh configuration
-linkerd:
-  inject: true

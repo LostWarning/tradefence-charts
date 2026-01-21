@@ -4,8 +4,6 @@ metadata:
   name: {{ .Values.appName }}-config
   namespace: {{ .Values.namespace }}
 data:
-  # Auth configuration
-  AUTH_TOKEN_EXPIRY: "{{ .Values.auth.tokenExpiry }}"
 
   # Application configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
