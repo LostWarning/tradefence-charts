@@ -67,3 +67,8 @@ config:
   custom: {}
 database:
   postgres_1: "postgres://devuser:devpass@host.k3d.internal:5432/tradefence?sslmode=disable"
+etcd:
+  endpoints:
+    - "http://etcd-0.etcd.infrastructure.svc.cluster.local:2379"
+    - "http://etcd-1.etcd.infrastructure.svc.cluster.local:2379"
+    - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
