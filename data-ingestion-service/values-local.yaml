@@ -13,11 +13,11 @@ replicaCount: 2
 # Service configuration
 service:
   type: ClusterIP
-  port: 8080
-  targetPort: 8080
+  port: 9090
+  targetPort: 9090
 # Container ports
-containerPort: 8080
-metricsPort: 9090
+grpcPort: 9090
+healthPort: 8080
 # Resource limits and requests (reduced for local)
 resources:
   limits:
