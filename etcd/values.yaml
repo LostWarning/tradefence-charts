@@ -1,6 +1,8 @@
 # etcd Custom Deployment - Default Values
 appName: etcd
 namespace: infrastructure
+version: "v3.6.0"
+environment: local
 
 # etcd image
 image:
@@ -8,8 +10,38 @@ image:
   tag: v3.6.0
   pullPolicy: IfNotPresent
 
+revisionHistoryLimit: 0
+
 # Number of etcd replicas
-replicaCount: 1
+replicaCount: 3
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 3
+
+# Pod anti-affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - etcd
+          topologyKey: kubernetes.io/hostname
 
 # Pod management policy for parallel startup
 podManagementPolicy: Parallel
@@ -26,20 +58,6 @@ ports:
   server: 2380
   metrics: 8080
 
-# Storage configuration
-persistence:
-  enabled: true
-  size: 1Gi
-
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 200m
-    memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
 # Readiness probe
 readinessProbe:
   initialDelaySeconds: 10
@@ -55,24 +73,10 @@ livenessProbe:
   timeoutSeconds: 5
   failureThreshold: 3
 
-# Pod anti-affinity
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app
-                operator: In
-                values:
-                  - etcd
-          topologyKey: kubernetes.io/hostname
-
-# Pod Disruption Budget
-podDisruptionBudget:
+# Storage configuration
+persistence:
   enabled: true
-  minAvailable: 2
+  size: 1Gi
 
 # etcd configuration
 etcd:
