@@ -1,0 +1,12 @@
+apiVersion: v2
+name: tradefence-traefik
+description: Custom Traefik for application and infrastructure monitoring
+type: application
+version: 1.0.0
+appVersion: "v38.0.2"
+
+dependencies:
+  - name: traefik
+    version: v38.0.2
+    repository: https://traefik.github.io/charts
+    alias: traefik
