@@ -2,6 +2,7 @@
 appName: redis
 namespace: infrastructure
 version: "8.2"
+environment: local
 
 # Redis image
 image:
@@ -9,8 +10,37 @@ image:
   tag: "8.2-alpine"
   pullPolicy: IfNotPresent
 
+revisionHistoryLimit: 0
+
 # Number of independent Redis replicas
 replicaCount: 1
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  minAvailable: 1
+
+# Pod anti-affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - redis
+          topologyKey: kubernetes.io/hostname
 
 # Service configuration
 service:
@@ -19,15 +49,6 @@ service:
 
 # Container port
 containerPort: 6379
-
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
 
 # Health checks
 livenessProbe:
@@ -48,7 +69,7 @@ redis:
   loglevel: "notice"
 
   # Max memory policy: allkeys-lru, volatile-lru, etc.
-  maxmemory: "256mb"
+  maxmemory: "1024mb"
   maxmemoryPolicy: "allkeys-lru"
 
   # Timeout for idle clients (0 = disabled)
@@ -63,21 +84,3 @@ redis:
     # Example:
     # appendonly: "yes"
     # appendfsync: "everysec"
-
-# Pod Disruption Budget
-podDisruptionBudget:
-  minAvailable: 0
-
-# Pod anti-affinity for HA
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app
-                operator: In
-                values:
-                  - redis
-          topologyKey: kubernetes.io/hostname
