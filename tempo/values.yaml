@@ -1,15 +1,21 @@
+# Local k3d configuration for Grafana Tempo
+
 tempo:
-  enabled: true
-  serviceName: grafana-tempo
-  persistence:
-    enabled: false
-    size: 5Gi
-  tempoQuery:
-    enabled: true
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+  tempo:
+    # Enable persistence for local development
+    persistence:
+      enabled: true
+      size: 5Gi
+
+    # Enable Tempo Query UI for local development
+    tempoQuery:
+      enabled: true
+
+    # Slightly higher resources for local dev
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
