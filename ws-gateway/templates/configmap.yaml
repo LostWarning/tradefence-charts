@@ -5,20 +5,12 @@ metadata:
   namespace: {{ .Values.namespace }}
 data:
 
-  REDIS_HOST: "{{ .Values.redis.host }}"
-  REDIS_PORT: "{{ .Values.redis.port }}"
-  REDIS_MAX_CONNECTIONS: "{{ .Values.redis.maxConnections }}"
-  REDIS_TIMEOUT: "{{ .Values.redis.timeout }}"
-
   # gRPC client configuration
   GRPC_KEEPALIVE_TIME: "{{ .Values.grpc.keepaliveTime }}"
   GRPC_KEEPALIVE_TIMEOUT: "{{ .Values.grpc.keepaliveTimeout }}"
   GRPC_PERMIT_WITHOUT_STREAM: "{{ .Values.grpc.permitWithoutStream }}"
   GRPC_MAX_CONNECTION_IDLE: "{{ .Values.grpc.maxConnectionIdle }}"
   GRPC_MAX_CONNECTION_AGE: "{{ .Values.grpc.maxConnectionAge }}"
-
-  # Auth configuration
-  AUTH_TOKEN_EXPIRY: "{{ .Values.auth.tokenExpiry }}"
 
   # Application configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"

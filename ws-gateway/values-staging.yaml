@@ -1,128 +1,23 @@
-# Staging configuration for API Gateway
+# Staging configuration for WebSocket Gateway
 
 appName: ws-gateway
 namespace: app
 environment: staging
 
-# Docker image
-image:
-  repository: ghcr.io/lostwarning/ws-gateway
-  tag: latest
-  pullPolicy: IfNotPresent
-
-# Replica count (HPA will override this)
+# Replica count
 replicaCount: 3
-
-# Service configuration
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 8080
-
-# Container ports
-containerPort: 8080
-metricsPort: 9090
-
-# Resource limits and requests (between local and production)
-resources:
-  limits:
-    cpu: 500m
-    memory: 1Gi
-  requests:
-    cpu: 100m
-    memory: 512Mi
 
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 20
+  maxReplicas: 50
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
   scaleUpStabilization: 0
-  # Custom metrics for WebSocket connections
-  customMetrics:
-    - name: websocket_connections_per_pod
-      targetAverageValue: "3000"
 
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 2
-
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-redis:
-  host: "redis-0.redis-headless" # Local Redis service
-  port: 6379
-  maxConnections: 50
-  timeout: 5
-
-# Stock-based routing configuration
-stockRouting:
-  enabled: true
-  tradingServiceHost: "trading-app-headless.default.svc.cluster.local"
-  tradingServiceGrpcPort: 50051
-  # Gateway calculates best pod based on user's portfolio overlap
-  routingStrategy: "portfolio-overlap"
-  # Minimum pods to consider routing to
-  minPods: 3
-  maxPods: 20
-
-# gRPC client configuration
-grpc:
-  keepaliveTime: 10s
-  keepaliveTimeout: 3s
-  permitWithoutStream: true
-  maxConnectionIdle: 30m
-  maxConnectionAge: 1h
-
-# JWT/Auth configuration
-auth:
-  jwtSecret: "" # Should be injected from secret
-  tokenExpiry: 24h
-
-# Application configuration
-config:
-  logLevel: "INFO"
-  websocketReadBufferSize: 4096
-  websocketWriteBufferSize: 4096
-  websocketMaxMessageSize: 1048576 # 1MB
-  custom: {}
-
-# Ingress configuration
-ingress:
-  enabled: true
-  ingressClassName: traefik
-  hosts:
-    - host: ws.staging.tradefence.in
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: staging-tradefence-tls
-      hosts:
-        - ws.staging.tradefence.in
-  annotations:
-    # WebSocket sticky sessions
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "gateway-session"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
-    # WebSocket protocol upgrade support
-    traefik.ingress.kubernetes.io/service.passhostheader: "true"
+  minAvailable: 3

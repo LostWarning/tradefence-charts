@@ -1,101 +1,23 @@
-# Local k3d configuration for API Gateway
+# Development configuration for WebSocket Gateway
 
 appName: ws-gateway
 namespace: app
-environment: local
-# Docker image
-image:
-  repository: registry.tradefence.in:5000/ws-gateway
-  tag: latest
-  pullPolicy: IfNotPresent
-# Replica count (reduced for local)
-replicaCount: 2
-# Service configuration
-service:
-  type: ClusterIP
-  port: 8080
-  targetPort: 8080
-# Container ports
-containerPort: 8080
-metricsPort: 9090
-# Resource limits and requests (reduced for local)
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-# Horizontal Pod Autoscaling (disabled for local)
+environment: dev
+
+# Replica count
+replicaCount: 3
+
+# Horizontal Pod Autoscaling
 autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 10
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 50
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
   scaleUpStabilization: 0
-  # Custom metrics for WebSocket connections
-  customMetrics:
-    - name: websocket_connections_per_pod
-      targetAverageValue: "1000"
-# Pod Disruption Budget (disabled for local)
+
+# Pod Disruption Budget
 podDisruptionBudget:
-  enabled: false
-  minAvailable: 1
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-redis:
-  host: "redis-0.redis-headless" # Local Redis service
-  port: 6379
-  maxConnections: 50
-  timeout: 5
-# JWT/Auth configuration
-auth:
-  jwtSecret: "local-dev-secret-change-me" # Local dev secret
-  tokenExpiry: 24h
-rateLimiter:
   enabled: true
-  type: "pod_ip"
-  rps: 1
-  burst: 5
-# Application configuration
-config:
-  logLevel: "DEBUG" # More verbose for local dev
-  websocketReadBufferSize: 4096
-  websocketWriteBufferSize: 4096
-  websocketMaxMessageSize: 1048576 # 1MB
-  custom: {}
-# Ingress configuration
-ingress:
-  enabled: true
-  ingressClassName: traefik
-  hosts:
-    - host: ws.dev.tradefence.in
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: ws-tradefence-tls
-      hosts:
-        - ws.dev.tradefence.in
-  annotations:
-    # WebSocket sticky sessions
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "gateway-session"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
-    # WebSocket protocol upgrade support
-    traefik.ingress.kubernetes.io/service.passhostheader: "true"
+  minAvailable: 3

@@ -1,38 +1,35 @@
-# API Gateway values for production deployment
+# WebSocket Gateway values for local deployment
 
 appName: ws-gateway
 namespace: app
-version: "1.0.0"
-environment: production
+version: "0.1.0-alpha.1"
+environment: local
+
 # Docker image
 image:
-  repository: ghcr.io/lostwarning/ws-gateway
-  tag: main-787b544
+  repository: registry.tradefence.in/ws-gateway
+  tag: latest
   pullPolicy: IfNotPresent
-# Replica count (HPA will override this)
-replicaCount: 10
+
 revisionHistoryLimit: 0
-# Service configuration
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 8080
-# Container ports
-containerPort: 8080
-metricsPort: 9090
+
+# Replica count
+replicaCount: 2
+
 # Resource limits and requests
 resources:
   limits:
-    cpu: 2000m
-    memory: 2Gi
-  requests:
     cpu: 1000m
-    memory: 1Gi
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
 # Horizontal Pod Autoscaling
 autoscaling:
-  enabled: true
-  minReplicas: 10
-  maxReplicas: 50
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
@@ -41,10 +38,21 @@ autoscaling:
   customMetrics:
     - name: websocket_connections_per_pod
       targetAverageValue: "5000"
+
 # Pod Disruption Budget
 podDisruptionBudget:
-  enabled: true
-  minAvailable: 5
+  enabled: false
+  minAvailable: 2
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+# Container ports
+containerPort: 8080
+metricsPort: 9090
+
 # Health checks
 livenessProbe:
   path: /health
@@ -58,11 +66,36 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
-redis:
-  host: redis-0.redis-headless
-  port: 6379
-  maxConnections: 100
-  timeout: 5
+
+# Ingress configuration
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - host: ws.local.tradefence.in
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: ws.local.tradefence.in
+      paths:
+        - path: /ws
+          pathType: Prefix
+  tls:
+    - secretName: api-tls
+      hosts:
+        - ws.local.tradefence.in
+  annotations:
+    # WebSocket sticky sessions
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "gateway-session"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
+
+# Linkerd service mesh configuration
+linkerd:
+  inject: true
+
 # gRPC client configuration
 grpc:
   keepaliveTime: 10s
@@ -70,10 +103,7 @@ grpc:
   permitWithoutStream: true
   maxConnectionIdle: 30m
   maxConnectionAge: 1h
-# JWT/Auth configuration
-auth:
-  jwtSecret: "" # Should be injected from secret
-  tokenExpiry: 24h
+
 # Application configuration
 config:
   logLevel: "INFO"
@@ -93,31 +123,3 @@ etcd:
     - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
 internalServices:
   userService: http://user-service:8080
-# Ingress configuration
-ingress:
-  enabled: true
-  ingressClassName: traefik
-  hosts:
-    - host: api.yourdomain.com
-      paths:
-        - path: /
-          pathType: Prefix
-    - host: ws.yourdomain.com
-      paths:
-        - path: /ws
-          pathType: Prefix
-  tls:
-    - secretName: api-tls
-      hosts:
-        - api.yourdomain.com
-        - ws.yourdomain.com
-  annotations:
-    # WebSocket sticky sessions
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "gateway-session"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
-# Linkerd service mesh configuration
-linkerd:
-  inject: true
