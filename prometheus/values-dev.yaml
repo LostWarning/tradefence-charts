@@ -1,291 +1,292 @@
 # Local k3d configuration for Prometheus stack
 
-# Prometheus Operator
-prometheusOperator:
-  # Disable admission webhooks to speed up deployment (safe for local dev)
-  admissionWebhooks:
-    enabled: false
-    patch:
-      enabled: false
-  tls:
-    enabled: false
-  resources:
-    limits:
-      cpu: 200m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 256Mi
-
-# Prometheus
 prometheus:
-  # Ingress for Prometheus UI
-  ingress:
-    enabled: true
-    ingressClassName: traefik
-    hosts:
-      - prometheus.dev.tradefence.in
-    paths:
-      - /
-    pathType: Prefix
-
-  prometheusSpec:
-    # Single replica for local
-    replicas: 1
-
-    # Short retention for local dev
-    retention: 7d
-    retentionSize: "10GB"
-
-    # Reduced resources for local
-    resources:
-      requests:
-        cpu: 100m
-        memory: 1Gi
-      limits:
-        cpu: 500m
-        memory: 2Gi
-
-    # Small storage for local
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 20Gi
-
-    # Service monitors
-    serviceMonitorSelectorNilUsesHelmValues: false
-    podMonitorSelectorNilUsesHelmValues: false
-
-# Grafana
-grafana:
-  enabled: true
-  replicas: 1
-
-  # Default admin password for local dev
-  adminPassword: "admin"
-
-  # Security context for Grafana
-  securityContext:
-    runAsUser: 472
-    runAsGroup: 472
-    fsGroup: 472
-    runAsNonRoot: false # Allow init container to run as root
-
-  # Init container configuration
-  initChownData:
-    enabled: false
-
-  # Disable auto-generated datasource since we provide explicit ones
-  sidecar:
-    datasources:
-      defaultDatasourceEnabled: false
-
-  # Grafana datasources
-  datasources:
-    datasources.yaml:
-      apiVersion: 1
-      datasources:
-        - name: Prometheus
-          type: prometheus
-          access: proxy
-          orgId: 1
-          url: http://prometheus-operated:9090
-          editable: true
-        - name: Tempo
-          type: tempo
-          access: proxy
-          orgId: 1
-          url: http://tempo:3200
-          editable: true
-        - name: Loki
-          type: loki
-          access: proxy
-          orgId: 1
-          url: http://loki-gateway
-          editable: true
-          jsonData:
-            maxLines: 1000
-            derivedFields: []
-          secureJsonData: {}
-
-  # Reduced resources
-  resources:
-    limits:
-      cpu: 200m
-      memory: 1Gi
-    requests:
-      cpu: 100m
-      memory: 512Mi
-
-  # Persistence for local
-  persistence:
-    enabled: true
-    size: 5Gi
-
-  # Ingress for local
-  ingress:
-    enabled: true
-    ingressClassName: traefik
-    hosts:
-      - grafana.dev.tradefence.in
+  # Prometheus Operator
+  prometheusOperator:
+    # Disable admission webhooks to speed up deployment (safe for local dev)
+    admissionWebhooks:
+      enabled: false
+      patch:
+        enabled: false
     tls:
-      - secretName: grafana-dev-tls
-        hosts:
-          - grafana.dev.tradefence.in
-
-  # Dashboard providers
-  dashboardProviders:
-    dashboardproviders.yaml:
-      apiVersion: 1
-      providers:
-        - name: "default"
-          orgId: 1
-          folder: ""
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/default
-
-  # Load default dashboards
-  dashboards:
-    default:
-      kubernetes-cluster:
-        gnetId: 7249
-        revision: 1
-        datasource: Prometheus
-      kubernetes-pods:
-        gnetId: 6417
-        revision: 1
-        datasource: Prometheus
-      traefik:
-        gnetId: 11462
-        revision: 1
-        datasource: Prometheus
-
-      # Node & Infrastructure Monitoring
-      node-exporter-full:
-        gnetId: 1860
-        revision: 31
-        datasource: Prometheus
-
-      # Kubernetes Monitoring
-      k8s-cluster-summary:
-        gnetId: 8588
-        revision: 1
-        datasource: Prometheus
-      k8s-dashboard:
-        gnetId: 15661
-        revision: 1
-        datasource: Prometheus
-      k8s-persistent-volumes:
-        gnetId: 13646
-        revision: 2
-        datasource: Prometheus
-
-      # Prometheus & Alertmanager
-      prometheus-overview:
-        gnetId: 3662
-        revision: 2
-        datasource: Prometheus
-      alertmanager:
-        gnetId: 9578
-        revision: 4
-        datasource: Prometheus
-
-      # Resource Monitoring & Workloads
-      kubernetes-dashboard:
-        gnetId: 18283
-        revision: 1
-        datasource: Prometheus
-      kubernetes-monitoring:
-        gnetId: 12740
-        revision: 1
-        datasource: Prometheus
-
-      # Loki & Logging
-      loki-stack:
-        gnetId: 13407
-        revision: 1
-        datasource: Loki
-      loki-kubernetes:
-        gnetId: 15005
-        revision: 1
-        datasource: Loki
-
-# Alertmanager
-alertmanager:
-  # Ingress for Alertmanager UI
-  ingress:
-    enabled: true
-    ingressClassName: traefik
-    hosts:
-      - alertmanager.dev.tradefence.in
-    paths:
-      - /
-    pathType: Prefix
-
-  alertmanagerSpec:
-    # Single replica for local
-    replicas: 1
-
-    # Minimal resources
+      enabled: false
     resources:
-      requests:
-        cpu: 50m
-        memory: 128Mi
       limits:
         cpu: 200m
+        memory: 512Mi
+      requests:
+        cpu: 100m
         memory: 256Mi
 
-    # Small storage
-    storage:
-      volumeClaimTemplate:
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 5Gi
+  # Prometheus
+  prometheus:
+    # Ingress for Prometheus UI
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - prometheus.dev.tradefence.in
+      paths:
+        - /
+      pathType: Prefix
 
-    # Basic alert config
-    config:
-      global:
-        resolve_timeout: 5m
-      route:
-        group_by: ["alertname", "cluster", "service"]
-        group_wait: 10s
-        group_interval: 10s
-        repeat_interval: 12h
-        receiver: "null"
-        routes:
-          - match:
-              alertname: Watchdog
-            receiver: "null"
-      receivers:
-        - name: "null"
+    prometheusSpec:
+      # Single replica for local
+      replicas: 1
 
-# Node exporter - minimal for local
-nodeExporter:
-  enabled: true
-  resources:
-    limits:
-      cpu: 100m
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 32Mi
+      # Short retention for local dev
+      retention: 7d
+      retentionSize: "10GB"
 
-# Kube state metrics - minimal for local
-kubeStateMetrics:
-  enabled: true
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
-# Tempo is deployed separately via ArgoCD Application
+      # Reduced resources for local
+      resources:
+        requests:
+          cpu: 100m
+          memory: 1Gi
+        limits:
+          cpu: 500m
+          memory: 2Gi
+
+      # Small storage for local
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 20Gi
+
+      # Service monitors
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+
+  # Grafana
+  grafana:
+    enabled: true
+    replicas: 1
+
+    # Default admin password for local dev
+    adminPassword: "admin"
+
+    # Security context for Grafana
+    securityContext:
+      runAsUser: 472
+      runAsGroup: 472
+      fsGroup: 472
+      runAsNonRoot: false # Allow init container to run as root
+
+    # Init container configuration
+    initChownData:
+      enabled: false
+
+    # Disable auto-generated datasource since we provide explicit ones
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
+
+    # Grafana datasources
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            orgId: 1
+            url: http://prometheus-operated:9090
+            editable: true
+          - name: Tempo
+            type: tempo
+            access: proxy
+            orgId: 1
+            url: http://tempo:3200
+            editable: true
+          - name: Loki
+            type: loki
+            access: proxy
+            orgId: 1
+            url: http://loki-gateway
+            editable: true
+            jsonData:
+              maxLines: 1000
+              derivedFields: []
+            secureJsonData: {}
+
+    # Reduced resources
+    resources:
+      limits:
+        cpu: 200m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 512Mi
+
+    # Persistence for local
+    persistence:
+      enabled: true
+      size: 5Gi
+
+    # Ingress for local
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - grafana.dev.tradefence.in
+      tls:
+        - secretName: grafana-dev-tls
+          hosts:
+            - grafana.dev.tradefence.in
+
+    # Dashboard providers
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: "default"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+
+    # Load default dashboards
+    dashboards:
+      default:
+        kubernetes-cluster:
+          gnetId: 7249
+          revision: 1
+          datasource: Prometheus
+        kubernetes-pods:
+          gnetId: 6417
+          revision: 1
+          datasource: Prometheus
+        traefik:
+          gnetId: 11462
+          revision: 1
+          datasource: Prometheus
+
+        # Node & Infrastructure Monitoring
+        node-exporter-full:
+          gnetId: 1860
+          revision: 31
+          datasource: Prometheus
+
+        # Kubernetes Monitoring
+        k8s-cluster-summary:
+          gnetId: 8588
+          revision: 1
+          datasource: Prometheus
+        k8s-dashboard:
+          gnetId: 15661
+          revision: 1
+          datasource: Prometheus
+        k8s-persistent-volumes:
+          gnetId: 13646
+          revision: 2
+          datasource: Prometheus
+
+        # Prometheus & Alertmanager
+        prometheus-overview:
+          gnetId: 3662
+          revision: 2
+          datasource: Prometheus
+        alertmanager:
+          gnetId: 9578
+          revision: 4
+          datasource: Prometheus
+
+        # Resource Monitoring & Workloads
+        kubernetes-dashboard:
+          gnetId: 18283
+          revision: 1
+          datasource: Prometheus
+        kubernetes-monitoring:
+          gnetId: 12740
+          revision: 1
+          datasource: Prometheus
+
+        # Loki & Logging
+        loki-stack:
+          gnetId: 13407
+          revision: 1
+          datasource: Loki
+        loki-kubernetes:
+          gnetId: 15005
+          revision: 1
+          datasource: Loki
+
+  # Alertmanager
+  alertmanager:
+    # Ingress for Alertmanager UI
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - alertmanager.dev.tradefence.in
+      paths:
+        - /
+      pathType: Prefix
+
+    alertmanagerSpec:
+      # Single replica for local
+      replicas: 1
+
+      # Minimal resources
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+
+      # Small storage
+      storage:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 5Gi
+
+      # Basic alert config
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          group_by: ["alertname", "cluster", "service"]
+          group_wait: 10s
+          group_interval: 10s
+          repeat_interval: 12h
+          receiver: "null"
+          routes:
+            - match:
+                alertname: Watchdog
+              receiver: "null"
+        receivers:
+          - name: "null"
+
+  # Node exporter - minimal for local
+  nodeExporter:
+    enabled: true
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 50m
+        memory: 32Mi
+
+  # Kube state metrics - minimal for local
+  kubeStateMetrics:
+    enabled: true
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+  # Tempo is deployed separately via ArgoCD Application

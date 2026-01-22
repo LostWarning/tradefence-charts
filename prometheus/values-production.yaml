@@ -1,305 +1,306 @@
 # Production configuration for Prometheus stack
 
-# Prometheus Operator
-prometheusOperator:
-  admissionWebhooks:
-    enabled: true
-    patch:
-      enabled: true
-  tls:
-    enabled: true
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 2Gi
-    requests:
-      cpu: 500m
-      memory: 1Gi
-
-# Prometheus
 prometheus:
-  # Ingress for Prometheus UI
-  ingress:
-    enabled: true
-    ingressClassName: traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
-    hosts:
-      - prometheus.yourdomain.com
+  # Prometheus Operator
+  prometheusOperator:
+    admissionWebhooks:
+      enabled: true
+      patch:
+        enabled: true
     tls:
-      - secretName: prometheus-tls
-        hosts:
-          - prometheus.yourdomain.com
+      enabled: true
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
 
-  prometheusSpec:
-    # Replica count for HA
+  # Prometheus
+  prometheus:
+    # Ingress for Prometheus UI
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+      hosts:
+        - prometheus.yourdomain.com
+      tls:
+        - secretName: prometheus-tls
+          hosts:
+            - prometheus.yourdomain.com
+
+    prometheusSpec:
+      # Replica count for HA
+      replicas: 2
+
+      # Retention
+      retention: 30d
+      retentionSize: "450GB"
+
+      # Resources
+      resources:
+        requests:
+          cpu: 2000m
+          memory: 8Gi
+        limits:
+          cpu: 4000m
+          memory: 16Gi
+
+      # Storage
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard-rwo
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 500Gi
+
+      # Service monitors
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+
+      # Additional scrape configs for custom metrics
+      additionalScrapeConfigs: []
+
+      # Pod anti-affinity
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - prometheus
+                topologyKey: kubernetes.io/hostname
+
+  # Grafana
+  grafana:
+    enabled: true
     replicas: 2
 
-    # Retention
-    retention: 30d
-    retentionSize: "450GB"
+    # Admin password (should be changed or use secret)
+    adminPassword: "CHANGE-ME-IN-PRODUCTION"
+
+    # Disable auto-generated datasource since we provide explicit ones
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
+
+    # Grafana datasources
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            orgId: 1
+            url: http://prometheus-operated:9090
+            editable: true
+          - name: Tempo
+            type: tempo
+            access: proxy
+            orgId: 1
+            url: http://tempo:3200
+            editable: true
+          - name: Loki
+            type: loki
+            access: proxy
+            orgId: 1
+            url: http://loki-gateway
+            editable: true
+            jsonData:
+              maxLines: 1000
+              derivedFields: []
+            secureJsonData: {}
 
     # Resources
     resources:
-      requests:
-        cpu: 2000m
-        memory: 8Gi
       limits:
-        cpu: 4000m
-        memory: 16Gi
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
 
-    # Storage
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: standard-rwo
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 500Gi
+    # Persistence
+    persistence:
+      enabled: true
+      storageClassName: standard-rwo
+      size: 10Gi
 
-    # Service monitors
-    serviceMonitorSelectorNilUsesHelmValues: false
-    podMonitorSelectorNilUsesHelmValues: false
+    # Ingress
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - grafana.yourdomain.com
+      tls:
+        - secretName: grafana-tls
+          hosts:
+            - grafana.yourdomain.com
 
-    # Additional scrape configs for custom metrics
-    additionalScrapeConfigs: []
+    # Dashboard providers
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: "default"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
 
-    # Pod anti-affinity
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values:
-                      - prometheus
-              topologyKey: kubernetes.io/hostname
+    # Load default dashboards
+    dashboards:
+      default:
+        kubernetes-cluster:
+          gnetId: 7249
+          revision: 1
+          datasource: Prometheus
+        kubernetes-pods:
+          gnetId: 6417
+          revision: 1
+          datasource: Prometheus
+        traefik:
+          gnetId: 11462
+          revision: 1
+          datasource: Prometheus
 
-# Grafana
-grafana:
-  enabled: true
-  replicas: 2
+        # Node & Infrastructure Monitoring
+        node-exporter-full:
+          gnetId: 1860
+          revision: 31
+          datasource: Prometheus
 
-  # Admin password (should be changed or use secret)
-  adminPassword: "CHANGE-ME-IN-PRODUCTION"
+        # Kubernetes Monitoring
+        k8s-cluster-summary:
+          gnetId: 8588
+          revision: 1
+          datasource: Prometheus
+        k8s-dashboard:
+          gnetId: 15661
+          revision: 1
+          datasource: Prometheus
+        k8s-persistent-volumes:
+          gnetId: 13646
+          revision: 2
+          datasource: Prometheus
 
-  # Disable auto-generated datasource since we provide explicit ones
-  sidecar:
-    datasources:
-      defaultDatasourceEnabled: false
+        # Prometheus & Alertmanager
+        prometheus-overview:
+          gnetId: 3662
+          revision: 2
+          datasource: Prometheus
+        alertmanager:
+          gnetId: 9578
+          revision: 4
+          datasource: Prometheus
 
-  # Grafana datasources
-  datasources:
-    datasources.yaml:
-      apiVersion: 1
-      datasources:
-        - name: Prometheus
-          type: prometheus
-          access: proxy
-          orgId: 1
-          url: http://prometheus-operated:9090
-          editable: true
-        - name: Tempo
-          type: tempo
-          access: proxy
-          orgId: 1
-          url: http://tempo:3200
-          editable: true
-        - name: Loki
-          type: loki
-          access: proxy
-          orgId: 1
-          url: http://loki-gateway
-          editable: true
-          jsonData:
-            maxLines: 1000
-            derivedFields: []
-          secureJsonData: {}
+        # Resource Monitoring & Workloads
+        kubernetes-dashboard:
+          gnetId: 18283
+          revision: 1
+          datasource: Prometheus
+        kubernetes-monitoring:
+          gnetId: 12740
+          revision: 1
+          datasource: Prometheus
 
-  # Resources
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 2Gi
-    requests:
-      cpu: 500m
-      memory: 1Gi
+        # Loki & Logging
+        loki-stack:
+          gnetId: 13407
+          revision: 1
+          datasource: Loki
+        loki-kubernetes:
+          gnetId: 15005
+          revision: 1
+          datasource: Loki
 
-  # Persistence
-  persistence:
+  # Alertmanager
+  alertmanager:
+    # Ingress for Alertmanager UI
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+      hosts:
+        - alertmanager.yourdomain.com
+      tls:
+        - secretName: alertmanager-tls
+          hosts:
+            - alertmanager.yourdomain.com
+
+    alertmanagerSpec:
+      replicas: 3
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard-rwo
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+
+      # Alert routing configuration
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          group_by: ["alertname", "cluster", "service"]
+          group_wait: 10s
+          group_interval: 10s
+          repeat_interval: 12h
+          receiver: "null"
+          routes:
+            - match:
+                alertname: Watchdog
+              receiver: "null"
+        receivers:
+          - name: "null"
+        # Add your receivers here (email, slack, pagerduty, etc.)
+
+  # Node exporter
+  nodeExporter:
     enabled: true
-    storageClassName: standard-rwo
-    size: 10Gi
-
-  # Ingress
-  ingress:
-    enabled: true
-    ingressClassName: traefik
-    hosts:
-      - grafana.yourdomain.com
-    tls:
-      - secretName: grafana-tls
-        hosts:
-          - grafana.yourdomain.com
-
-  # Dashboard providers
-  dashboardProviders:
-    dashboardproviders.yaml:
-      apiVersion: 1
-      providers:
-        - name: "default"
-          orgId: 1
-          folder: ""
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/default
-
-  # Load default dashboards
-  dashboards:
-    default:
-      kubernetes-cluster:
-        gnetId: 7249
-        revision: 1
-        datasource: Prometheus
-      kubernetes-pods:
-        gnetId: 6417
-        revision: 1
-        datasource: Prometheus
-      traefik:
-        gnetId: 11462
-        revision: 1
-        datasource: Prometheus
-
-      # Node & Infrastructure Monitoring
-      node-exporter-full:
-        gnetId: 1860
-        revision: 31
-        datasource: Prometheus
-
-      # Kubernetes Monitoring
-      k8s-cluster-summary:
-        gnetId: 8588
-        revision: 1
-        datasource: Prometheus
-      k8s-dashboard:
-        gnetId: 15661
-        revision: 1
-        datasource: Prometheus
-      k8s-persistent-volumes:
-        gnetId: 13646
-        revision: 2
-        datasource: Prometheus
-
-      # Prometheus & Alertmanager
-      prometheus-overview:
-        gnetId: 3662
-        revision: 2
-        datasource: Prometheus
-      alertmanager:
-        gnetId: 9578
-        revision: 4
-        datasource: Prometheus
-
-      # Resource Monitoring & Workloads
-      kubernetes-dashboard:
-        gnetId: 18283
-        revision: 1
-        datasource: Prometheus
-      kubernetes-monitoring:
-        gnetId: 12740
-        revision: 1
-        datasource: Prometheus
-
-      # Loki & Logging
-      loki-stack:
-        gnetId: 13407
-        revision: 1
-        datasource: Loki
-      loki-kubernetes:
-        gnetId: 15005
-        revision: 1
-        datasource: Loki
-
-# Alertmanager
-alertmanager:
-  # Ingress for Alertmanager UI
-  ingress:
-    enabled: true
-    ingressClassName: traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
-    hosts:
-      - alertmanager.yourdomain.com
-    tls:
-      - secretName: alertmanager-tls
-        hosts:
-          - alertmanager.yourdomain.com
-
-  alertmanagerSpec:
-    replicas: 3
-
     resources:
+      limits:
+        cpu: 200m
+        memory: 128Mi
       requests:
         cpu: 100m
-        memory: 256Mi
+        memory: 64Mi
+
+  # Kube state metrics
+  kubeStateMetrics:
+    enabled: true
+    resources:
       limits:
-        cpu: 500m
-        memory: 512Mi
-
-    storage:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: standard-rwo
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 10Gi
-
-    # Alert routing configuration
-    config:
-      global:
-        resolve_timeout: 5m
-      route:
-        group_by: ["alertname", "cluster", "service"]
-        group_wait: 10s
-        group_interval: 10s
-        repeat_interval: 12h
-        receiver: "null"
-        routes:
-          - match:
-              alertname: Watchdog
-            receiver: "null"
-      receivers:
-        - name: "null"
-      # Add your receivers here (email, slack, pagerduty, etc.)
-
-# Node exporter
-nodeExporter:
-  enabled: true
-  resources:
-    limits:
-      cpu: 200m
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 64Mi
-
-# Kube state metrics
-kubeStateMetrics:
-  enabled: true
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-# Tempo is deployed separately via ArgoCD Application
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  # Tempo is deployed separately via ArgoCD Application
