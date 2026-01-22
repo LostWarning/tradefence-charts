@@ -1,34 +1,53 @@
 # NATS Cluster - Default Values
 appName: nats
 namespace: infrastructure
+version: "2.12.2"
+environment: local
 
-# NATS image
+# Docker image
 image:
   repository: nats
   tag: "2.12.2-alpine"
   pullPolicy: IfNotPresent
 
-# Number of NATS replicas
+revisionHistoryLimit: 0
+
+# Number of replicas
 replicaCount: 3
 
-# Cluster configuration
-cluster:
-  name: tradefence-nats
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 3
+
+# Pod anti-affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - nats
+          topologyKey: kubernetes.io/hostname
 
 # Container ports
 ports:
   client: 4222
   cluster: 6222
   monitoring: 8222
-
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 200m
-    memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
 
 # Liveness probe configuration
 livenessProbe:
@@ -44,17 +63,13 @@ readinessProbe:
   timeoutSeconds: 3
   failureThreshold: 3
 
-# NATS server configuration
+# NATS configuration
 nats:
-  logLevel: "info"
-  maxConnections: "1000"
+  logLevel: "debug"
+  maxConnections: "500"
   maxPayload: "1048576"
   writeDeadline: "2s"
 
-# Pod Disruption Budget
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 2
-
-# Pod anti-affinity
-affinity: {}
+# Cluster configuration
+cluster:
+  name: tradefence-nats

@@ -1,41 +1,5 @@
 # NATS Staging Environment Values
+
 appName: nats
 namespace: infrastructure
-
-# 3 replicas for staging
-replicaCount: 3
-
-# Staging resources - moderate
-resources:
-  limits:
-    cpu: 250m
-    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 256Mi
-
-# NATS configuration for staging
-nats:
-  logLevel: "info"
-  maxConnections: "2000"
-  maxPayload: "1048576"
-  writeDeadline: "2s"
-
-# Pod disruption budget
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 2
-
-# Preferred anti-affinity
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app
-                operator: In
-                values:
-                  - nats
-          topologyKey: kubernetes.io/hostname
+environment: staging

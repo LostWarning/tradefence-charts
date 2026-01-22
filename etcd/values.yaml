@@ -12,7 +12,7 @@ image:
 
 revisionHistoryLimit: 0
 
-# Number of etcd replicas
+# Number of replicas
 replicaCount: 3
 
 # Resource limits and requests
