@@ -1,78 +1,23 @@
-# Production configuration for API Gateway
+# Production configuration for Notification Service
 
 appName: notification-service
 namespace: app
 environment: production
 
-# Docker image
-image:
-  repository: ghcr.io/lostwarning/notification-service
-  tag: latest
-  pullPolicy: IfNotPresent
-
-# Replica count (HPA will override this)
-replicaCount: 10
-
-# Service configuration
-service:
-  type: ClusterIP
-  port: 9090
-  targetPort: 9090
-
-# Container ports
-grpcPort: 9090
-healthPort: 8080
-
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 2000m
-    memory: 2Gi
-  requests:
-    cpu: 1000m
-    memory: 1Gi
+# Replica count
+replicaCount: 3
 
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: true
-  minReplicas: 10
+  minReplicas: 3
   maxReplicas: 50
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
   scaleUpStabilization: 0
-  # Custom metrics for WebSocket connections
-  customMetrics:
-    - name: websocket_connections_per_pod
-      targetAverageValue: "5000"
 
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 5
-
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-# Application configuration
-config:
-  logLevel: "INFO"
-  custom: {}
-internalServices:
-  userDataRepository:
-    address: "user-data-repository:9090"
-# Linkerd service mesh configuration
-linkerd:
-  inject: true
+  minAvailable: 3
