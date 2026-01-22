@@ -7,7 +7,7 @@ environment: production
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 3
+  minAvailable: 2
 
 # Pod anti-affinity
 affinity:

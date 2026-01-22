@@ -42,7 +42,7 @@ autoscaling:
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: false
-  minAvailable: 2
+  minAvailable: 1
 
 # Service configuration
 service:

@@ -5,13 +5,13 @@ namespace: app
 environment: staging
 
 # Replica count
-replicaCount: 3
+replicaCount: 2
 
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: true
-  minReplicas: 3
-  maxReplicas: 20
+  minReplicas: 2
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
@@ -20,4 +20,4 @@ autoscaling:
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 3
+  minAvailable: 1

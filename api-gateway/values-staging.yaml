@@ -17,7 +17,7 @@ autoscaling:
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 2
+  minAvailable: 1
 
 # Ingress configuration
 ingress:

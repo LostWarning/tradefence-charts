@@ -26,6 +26,7 @@ resources:
 
 # Pod Disruption Budget
 podDisruptionBudget:
+  enabled: false
   minAvailable: 1
 
 # Pod anti-affinity

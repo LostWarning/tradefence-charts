@@ -11,7 +11,7 @@ replicaCount: 3
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 50
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
@@ -20,4 +20,4 @@ autoscaling:
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 3
+  minAvailable: 1
