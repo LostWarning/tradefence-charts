@@ -5,11 +5,6 @@ metadata:
   namespace: {{ .Values.namespace }}
 data:
 
-  REDIS_HOST: "{{ .Values.redis.host }}"
-  REDIS_PORT: "{{ .Values.redis.port }}"
-  REDIS_MAX_CONNECTIONS: "{{ .Values.redis.maxConnections }}"
-  REDIS_TIMEOUT: "{{ .Values.redis.timeout }}"
-
   # Application configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
 

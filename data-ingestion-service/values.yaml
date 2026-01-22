@@ -4,47 +4,52 @@ appName: data-ingestion-service
 namespace: app
 version: "0.1.0-alpha.1"
 environment: local
+
 # Docker image
 image:
   repository: registry.tradefence.in:5000/data-ingestion-service
   tag: latest
   pullPolicy: IfNotPresent
-# Replica count (HPA will override this)
-replicaCount: 10
+
 revisionHistoryLimit: 0
+
+# Replica count (HPA will override this)
+replicaCount: 2
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Horizontal Pod Autoscaling
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  scaleDownStabilization: 300
+  scaleUpStabilization: 0
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
 # Service configuration
 service:
   type: ClusterIP
   port: 80
   targetPort: 8080
+
 # Container ports
-containerPort: 8080
-metricsPort: 9090
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 2000m
-    memory: 2Gi
-  requests:
-    cpu: 1000m
-    memory: 1Gi
-# Horizontal Pod Autoscaling
-autoscaling:
-  enabled: true
-  minReplicas: 10
-  maxReplicas: 50
-  targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 80
-  scaleDownStabilization: 300
-  scaleUpStabilization: 0
-  # Custom metrics for WebSocket connections
-  customMetrics:
-    - name: websocket_connections_per_pod
-      targetAverageValue: "5000"
-# Pod Disruption Budget
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 5
+grpcPort: 9090
+healthPort: 8080
+
 # Health checks
 livenessProbe:
   path: /health
@@ -58,11 +63,11 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
-redis:
-  host: "redis-0.redis-headless" # Local Redis service
-  port: 6379
-  maxConnections: 50
-  timeout: 5
+
+# Linkerd service mesh configuration
+linkerd:
+  inject: true
+
 # Application configuration
 config:
   logLevel: "INFO"
@@ -77,6 +82,3 @@ etcd:
 internalServices:
   telemetryEndpoint: tempo.monitoring:4317
   logEndpoint: http://loki-write.monitoring.svc.cluster.local:3100/loki/api/v1/push
-# Linkerd service mesh configuration
-linkerd:
-  inject: true

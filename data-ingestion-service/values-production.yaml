@@ -4,75 +4,24 @@ appName: data-ingestion-service
 namespace: app
 environment: production
 
-# Docker image
-image:
-  repository: ghcr.io/lostwarning/data-ingestion-service
-  tag: latest
-  pullPolicy: IfNotPresent
-
-# Replica count (HPA will override this)
-replicaCount: 10
-
-# Service configuration
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 8080
-
-# Container ports
-containerPort: 8080
-metricsPort: 9090
-
-# Resource limits and requests
-resources:
-  limits:
-    cpu: 2000m
-    memory: 2Gi
-  requests:
-    cpu: 1000m
-    memory: 1Gi
+# Replica count
+replicaCount: 3
 
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: true
-  minReplicas: 10
-  maxReplicas: 50
+  minReplicas: 3
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
   scaleUpStabilization: 0
-  # Custom metrics for WebSocket connections
-  customMetrics:
-    - name: websocket_connections_per_pod
-      targetAverageValue: "5000"
 
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 5
-
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-redis:
-  host: "redis-0.redis-headless"  # Local Redis service
-  port: 6379
-  maxConnections: 50
-  timeout: 5
+  minAvailable: 3
 
 # Application configuration
 config:
   logLevel: "INFO"
-  custom: {}
