@@ -43,10 +43,6 @@ ingress:
     traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
 
-# Linkerd service mesh configuration
-linkerd:
-  inject: true
-
 # Application configuration
 config:
   logLevel: "INFO"
