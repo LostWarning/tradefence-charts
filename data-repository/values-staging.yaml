@@ -4,39 +4,14 @@ appName: data-repository
 namespace: app
 environment: staging
 
-# Docker image
-image:
-  repository: ghcr.io/lostwarning/data-repository
-  tag: latest
-  pullPolicy: IfNotPresent
-
-# Replica count (HPA will override this)
+# Replica count
 replicaCount: 3
-
-# Service configuration
-service:
-  type: ClusterIP
-  port: 9090
-  targetPort: 9090
-
-# Container ports
-grpcPort: 9090
-healthPort: 8080
-
-# Resource limits and requests (between local and production)
-resources:
-  limits:
-    cpu: 500m
-    memory: 1Gi
-  requests:
-    cpu: 100m
-    memory: 512Mi
 
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 20
+  maxReplicas: 50
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
@@ -45,33 +20,8 @@ autoscaling:
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
-  minAvailable: 2
-
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-# Redis configuration for session management (staging Memorystore)
-redis:
-  enabled: true
-  host: "" # Will be populated from Terraform output
-  port: 6379
-  db: 0
-  maxConnections: 75
-  timeout: 5
+  minAvailable: 3
 
 # Application configuration
 config:
   logLevel: "INFO"
-  custom: {}

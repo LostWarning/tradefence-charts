@@ -3,4 +3,4 @@ name: tradefence-data-repository
 description: Data repository service for TradeFence platform
 type: application
 version: 1.0.0
-appVersion: "1.0"
+appVersion: "0.1.0-alpha.1"
