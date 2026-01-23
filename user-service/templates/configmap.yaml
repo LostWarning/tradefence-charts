@@ -8,6 +8,8 @@ data:
   # Application configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
 
+  TELEMETRY_ENDPOINT: "{{ .Values.internalServices.telemetryEndpoint }}"
+
   # User Data Repository configuration
   USER_DATA_REPOSITORY_ADDR: "{{ .Values.internalServices.userDataRepository.address }}"
 
