@@ -27,11 +27,11 @@ prometheus:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.tls: "true"
       hosts:
-        - prometheus.yourdomain.com
+        - prometheus.tradefence.in
       tls:
         - secretName: prometheus-tls
           hosts:
-            - prometheus.yourdomain.com
+            - prometheus.tradefence.in
 
     prometheusSpec:
       # Replica count for HA
@@ -109,13 +109,13 @@ prometheus:
             type: tempo
             access: proxy
             orgId: 1
-            url: http://tempo:3200
+            url: http://prod-tempo:3200
             editable: true
           - name: Loki
             type: loki
             access: proxy
             orgId: 1
-            url: http://loki-gateway
+            url: http://prod-loki-gateway
             editable: true
             jsonData:
               maxLines: 1000
@@ -142,11 +142,11 @@ prometheus:
       enabled: true
       ingressClassName: traefik
       hosts:
-        - grafana.yourdomain.com
+        - grafana.tradefence.in
       tls:
         - secretName: grafana-tls
           hosts:
-            - grafana.yourdomain.com
+            - grafana.tradefence.in
 
     # Dashboard providers
     dashboardProviders:
@@ -238,11 +238,11 @@ prometheus:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.tls: "true"
       hosts:
-        - alertmanager.yourdomain.com
+        - alertmanager.tradefence.in
       tls:
         - secretName: alertmanager-tls
           hosts:
-            - alertmanager.yourdomain.com
+            - alertmanager.tradefence.in
 
     alertmanagerSpec:
       replicas: 3

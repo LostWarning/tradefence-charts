@@ -99,13 +99,13 @@ prometheus:
             type: tempo
             access: proxy
             orgId: 1
-            url: http://tempo:3200
+            url: http://dev-tempo:3200
             editable: true
           - name: Loki
             type: loki
             access: proxy
             orgId: 1
-            url: http://loki-gateway
+            url: http://dev-loki-gateway
             editable: true
             jsonData:
               maxLines: 1000
