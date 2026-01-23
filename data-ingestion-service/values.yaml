@@ -8,8 +8,8 @@ environment: local
 # Docker image
 image:
   repository: registry.tradefence.in:5000/data-ingestion-service
-  tag: latest
-  pullPolicy: Always
+  tag: 0.1.0-alpha.1
+  pullPolicy: IfNotPresent
 
 revisionHistoryLimit: 0
 
