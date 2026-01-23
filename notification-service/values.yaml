@@ -7,7 +7,7 @@ environment: local
 
 # Docker image
 image:
-  repository: registry.tradefence.in/notification-service
+  repository: registry.tradefence.in:5000/notification-service
   tag: latest
   pullPolicy: IfNotPresent
 

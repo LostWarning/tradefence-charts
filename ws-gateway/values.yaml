@@ -7,7 +7,7 @@ environment: local
 
 # Docker image
 image:
-  repository: registry.tradefence.in/ws-gateway
+  repository: registry.tradefence.in:5000/ws-gateway
   tag: latest
   pullPolicy: IfNotPresent
 

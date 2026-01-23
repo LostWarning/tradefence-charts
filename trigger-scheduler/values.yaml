@@ -7,7 +7,7 @@ environment: local
 
 # Docker image
 image:
-  repository: registry.tradefence.in/trigger-scheduler
+  repository: registry.tradefence.in:5000/trigger-scheduler
   tag: latest
   pullPolicy: IfNotPresent
 

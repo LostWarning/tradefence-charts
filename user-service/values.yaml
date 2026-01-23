@@ -7,7 +7,7 @@ environment: local
 
 # Docker image
 image:
-  repository: registry.tradefence.in/user-service
+  repository: registry.tradefence.in:5000/user-service
   tag: latest
   pullPolicy: IfNotPresent
 

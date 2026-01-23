@@ -7,7 +7,7 @@ environment: local
 
 # Docker image
 image:
-  repository: registry.tradefence.in/data-repository
+  repository: registry.tradefence.in:5000/data-repository
   tag: latest
   pullPolicy: IfNotPresent
 
