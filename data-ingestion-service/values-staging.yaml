@@ -25,3 +25,6 @@ podDisruptionBudget:
 # Application configuration
 config:
   logLevel: "INFO"
+
+internalServices:
+  telemetryEndpoint: staging-tempo.monitoring:4317

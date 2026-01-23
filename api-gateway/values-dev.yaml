@@ -28,3 +28,6 @@ ingress:
 # Application configuration
 config:
   logLevel: "DEBUG"
+
+internalServices:
+  telemetryEndpoint: dev-tempo.monitoring:4317

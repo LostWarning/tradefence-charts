@@ -46,3 +46,6 @@ ingress:
 # Application configuration
 config:
   logLevel: "INFO"
+
+internalServices:
+  telemetryEndpoint: prod-tempo.monitoring:4317
