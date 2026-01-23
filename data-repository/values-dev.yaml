@@ -8,3 +8,6 @@ environment: dev
 config:
   logLevel: "DEBUG"
   custom: {}
+
+database:
+  postgres_1: "postgres://devuser:devpass@dev.tradefence.in:5432/tradefence?sslmode=disable"
