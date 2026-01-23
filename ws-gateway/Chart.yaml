@@ -3,4 +3,4 @@ name: tradefence-ws-gateway
 description: WebSocket Gateway for TradeFence
 type: application
 version: 1.0.0
-appVersion: "0.1.0-alpha.1"
+appVersion: "0.1.0-build.20260124-0436.d102e82"
