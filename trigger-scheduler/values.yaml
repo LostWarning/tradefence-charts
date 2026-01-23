@@ -8,7 +8,7 @@ environment: local
 # Docker image
 image:
   repository: registry.tradefence.in:5000/trigger-scheduler
-  tag: 0.1.0-alpha.1
+  tag: "880e92a"
   pullPolicy: IfNotPresent
 
 revisionHistoryLimit: 0
