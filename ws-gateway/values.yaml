@@ -8,7 +8,7 @@ environment: local
 # Docker image
 image:
   repository: registry.tradefence.in:5000/ws-gateway
-  tag: 0.1.0-alpha.1
+  tag: "d102e82"
   pullPolicy: IfNotPresent
 
 revisionHistoryLimit: 0
