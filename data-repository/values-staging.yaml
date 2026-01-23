@@ -25,3 +25,6 @@ podDisruptionBudget:
 # Application configuration
 config:
   logLevel: "INFO"
+
+database:
+  postgres_1: "postgres://devuser:devpass@staging.tradefence.in:5432/tradefence?sslmode=disable"
