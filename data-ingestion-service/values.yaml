@@ -9,7 +9,7 @@ environment: local
 image:
   repository: registry.tradefence.in:5000/data-ingestion-service
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 revisionHistoryLimit: 0
 
