@@ -18,6 +18,8 @@ spec:
       labels:
         app: {{ .Values.appName }}
         version: {{ .Values.version }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       # Service account for workload identity
       serviceAccountName: {{ .Values.appName }}
