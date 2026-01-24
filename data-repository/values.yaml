@@ -2,20 +2,16 @@
 
 appName: data-repository
 namespace: app
-version: "0.1.0-alpha.1"
+version: "0.1.0-build.20260124-1249.e800b62"
 environment: local
-
 # Docker image
 image:
   repository: registry.tradefence.in:5000/data-repository
-  tag: "e800b62"
+  tag: "0.1.0-build.20260124-1249.e800b62"
   pullPolicy: IfNotPresent
-
 revisionHistoryLimit: 0
-
 # Replica count
 replicaCount: 2
-
 # Resource limits and requests
 resources:
   limits:
@@ -24,7 +20,6 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
-
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: false
@@ -34,12 +29,10 @@ autoscaling:
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
   scaleUpStabilization: 0
-
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: false
   minAvailable: 1
-
 # Service configuration
 service:
   type: ClusterIP
@@ -48,7 +41,6 @@ service:
 # Container ports
 grpcPort: 9090
 healthPort: 8080
-
 # Health checks
 livenessProbe:
   path: /health
@@ -62,7 +54,6 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
-
 # Application configuration
 config:
   logLevel: "INFO"
