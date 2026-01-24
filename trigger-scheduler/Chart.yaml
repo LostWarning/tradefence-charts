@@ -3,4 +3,4 @@ name: tradefence-trigger-scheduler
 description: Trigger scheduler for TradeFence platform
 type: application
 version: 1.0.0
-appVersion: "0.1.0-alpha.1"
+appVersion: "0.1.0-build.20260124-1251.880e92a"
