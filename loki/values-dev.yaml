@@ -15,7 +15,7 @@ loki:
         admin: loki-logs
       type: s3
       s3:
-        endpoint: http://host.k3d.internal:9000
+        endpoint: http://dev.tradefence.in:9000
         insecure: true
         s3ForcePathStyle: true
         # WARNING: Hardcoded credentials for local development only
