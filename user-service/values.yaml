@@ -2,12 +2,12 @@
 
 appName: user-service
 namespace: app
-version: "1.0.1-hotfix-build.20260126-0049.6f9bdfa"
+version: "manual-tag-v1"
 environment: local
 # Docker image
 image:
   repository: registry.tradefence.in:5000/user-service
-  tag: "1.0.1-hotfix-build.20260126-0049.6f9bdfa"
+  tag: "manual-tag-v1"
   pullPolicy: IfNotPresent
 revisionHistoryLimit: 0
 # Replica count
