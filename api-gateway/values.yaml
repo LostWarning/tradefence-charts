@@ -2,7 +2,7 @@
 
 appName: api-gateway
 namespace: app
-version: "1.0.0.alpha.2-build.20260126-0349.f6fccbd"
+version: "1.0.0.alpha.2"
 environment: local
 # Docker image
 image:
