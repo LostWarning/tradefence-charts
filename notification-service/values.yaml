@@ -2,12 +2,12 @@
 
 appName: notification-service
 namespace: app
-version: "0.1.0-build.20260124-1250.c156a06"
+version: "1.0.0.alpha.1-build.20260125-2219.c156a06"
 environment: local
 # Docker image
 image:
   repository: registry.tradefence.in:5000/notification-service
-  tag: "0.1.0-build.20260124-1250.c156a06"
+  tag: "1.0.0.alpha.1-build.20260125-2219.c156a06"
   pullPolicy: IfNotPresent
 revisionHistoryLimit: 0
 # Replica count
