@@ -1,5 +1,0 @@
-# NATS Staging Environment Values
-
-appName: nats
-namespace: infrastructure
-environment: staging

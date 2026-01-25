@@ -1,4 +1,0 @@
-# Redis development values
-appName: redis
-namespace: infrastructure
-environment: dev

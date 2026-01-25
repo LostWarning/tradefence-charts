@@ -1,5 +1,0 @@
-# NATS Local Development Values
-
-appName: nats
-namespace: infrastructure
-environment: dev

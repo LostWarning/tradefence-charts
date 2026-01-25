@@ -1,5 +1,0 @@
-# Staging configuration for API Gateway
-
-appName: notification-service
-namespace: app
-environment: staging

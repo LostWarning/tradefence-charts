@@ -1,4 +1,0 @@
-# Redis production environment values
-appName: redis
-namespace: infrastructure
-environment: production

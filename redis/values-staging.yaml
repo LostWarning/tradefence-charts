@@ -1,4 +1,0 @@
-# Redis staging environment values
-appName: redis
-namespace: infrastructure
-environment: staging

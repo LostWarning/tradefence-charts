@@ -1,5 +1,0 @@
-# Development configuration for Notification Service
-
-appName: notification-service
-namespace: app
-environment: dev
