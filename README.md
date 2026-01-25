@@ -72,18 +72,21 @@ CI Builder & Branching
 
 The builder employs a **Convention-Over-Configuration** strategy to manage infrastructure branches.
 
-### 1. Standard Development (No Tag Argument)
+### 1. Standard Development (No Argument)
+*   **Action**: Builds the code currently at `HEAD` (defaults to checked out branch).
 *   **Target**: Defaults to `main` (or `GITOPS_BRANCH` if set).
 *   **Use Case**: Daily CI builds, dev environment updates.
 
-### 2. Release & Hotfix (With Tag Argument)
-When the builder is invoked with a specific release tag (e.g., `./builder.sh app v1.0.1`), it activates **Auto-Branching**:
+### 2. Manual Release (With Reference Argument)
+When the builder is invoked with a specific reference (e.g., `./builder.sh app v1.0.1`), it performs a **Source Checkout**:
 
-1.  **Derives Branch Name**: `fix/{app-name}-v{base-version}`
-    *   Example: `VERSION=1.0.1` -> `fix/api-gateway-v1.0`
-2.  **Auto-Creation**:
-    *   If the branch exists, it is used.
-    *   If missing, it is automatically created from the source tag (`{app-name}-v{VERSION}` or `GITOPS_TAG`).
+1.  **Checkouts Code**: `git checkout v1.0.1` (The argument is a Tag/SHA/Branch).
+2.  **Activates Auto-Branching**:
+    *   **Derives Branch Name**: `fix/{app-name}-v{base-version}`
+        *   Example: `VERSION=1.0.1` -> `fix/api-gateway-v1.0`
+    *   **Auto-Creation**:
+        *   If the branch exists, it is used.
+        *   If missing, it is automatically created from the source tag (`{app-name}-v{VERSION}` or `GITOPS_TAG`).
 
 This ensures that hotfixes requiring infrastructure changes are isolated from `main`.
 
