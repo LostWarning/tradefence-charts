@@ -2,12 +2,12 @@
 
 appName: api-gateway
 namespace: app
-version: "1.0.0.alpha.1-build.20260125-2212.e56f256"
+version: "1.0.0.alpha.1-build.20260126-0022.e56f256"
 environment: local
 # Docker image
 image:
   repository: registry.tradefence.in:5000/api-gateway
-  tag: "1.0.0.alpha.1-build.20260125-2212.e56f256"
+  tag: "1.0.0.alpha.1-build.20260126-0022.e56f256"
   pullPolicy: IfNotPresent
 revisionHistoryLimit: 0
 # Replica count
