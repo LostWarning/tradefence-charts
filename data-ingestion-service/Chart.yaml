@@ -1,6 +1,11 @@
 apiVersion: v2
 name: tradefence-data-ingestion-service
 description: Service to fetch realtime stock data and publish it to redis
+sources:
+  - git+ssh://git@git.tradefence.in:data-ingestion-service.git
+maintainers:
+  - name: Amal C.S
+    email: amal4cs@gmail.com
 type: application
 version: 1.0.0
 appVersion: "1.0.0.alpha.1-build.20260125-2216.3f801ea"
