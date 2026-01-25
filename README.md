@@ -57,10 +57,6 @@ The `builder.sh` script reads this file to generate the final Docker tag.
 The file can contain just the version string, or key-value configuration:
 ```bash
 VERSION=1.0.1-rc.1
-# Optional: Override target infra branch (default: main)
-GITOPS_BRANCH=release-1.0
-# Optional: Override source tag for auto-branch creation
-GITOPS_TAG=v1.0.0
 ```
 
 **Generated Tag Format:**
@@ -72,9 +68,13 @@ CI Builder & Branching
 
 The builder employs a **Convention-Over-Configuration** strategy to manage infrastructure branches.
 
+**Automation Note**: The builder is invoked automatically by the CI system whenever a commit is pushed to:
+*   The `main` branch.
+*   Any branch starting with `hotfix/`.
+
 ### 1. Standard Development (No Argument)
-*   **Action**: Builds the code currently at `HEAD` (defaults to checked out branch).
-*   **Target**: Defaults to `main` (or `GITOPS_BRANCH` if set).
+*   **Action**: Builds the code from the `main` branch (automatically invoked by CI hooks).
+*   **Target**: Defaults to `main`.
 *   **Use Case**: Daily CI builds, dev environment updates.
 
 ### 2. Manual Release (With Reference Argument)
@@ -86,7 +86,7 @@ When the builder is invoked with a specific reference (e.g., `./builder.sh app v
         *   Example: `VERSION=1.0.1` -> `fix/api-gateway-v1.0`
     *   **Auto-Creation**:
         *   If the branch exists, it is used.
-        *   If missing, it is automatically created from the source tag (`{app-name}-v{VERSION}` or `GITOPS_TAG`).
+        *   If missing, it is automatically created from the source tag (`{app-name}-v{VERSION}`).
 
 This ensures that hotfixes requiring infrastructure changes are isolated from `main`.
 
