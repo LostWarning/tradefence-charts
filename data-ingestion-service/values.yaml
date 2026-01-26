@@ -70,4 +70,3 @@ etcd:
     - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
 internalServices:
   telemetryEndpoint: tempo.monitoring:4317
-  logEndpoint: http://loki-write.monitoring.svc.cluster.local:3100/loki/api/v1/push

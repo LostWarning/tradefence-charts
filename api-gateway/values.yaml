@@ -17,24 +17,23 @@ image:
   tag: 1.0.0.alpha.3-build.20260127-0151.3006f73
 ingress:
   annotations:
-    traefik.ingress.kubernetes.io/service.sticky.cookie: 'true'
-    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: 'true'
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.name: gateway-session
     traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: strict
-    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: 'true'
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
   enabled: true
   hosts:
-  - host: api.local.tradefence.in
-    paths:
-    - path: /
-      pathType: Prefix
+    - host: api.local.tradefence.in
+      paths:
+        - path: /
+          pathType: Prefix
   ingressClassName: traefik
   tls:
-  - hosts:
-    - api.local.tradefence.in
-    secretName: api-local-tradefence-tls
+    - hosts:
+        - api.local.tradefence.in
+      secretName: api-local-tradefence-tls
 internalServices:
-  logEndpoint: http://loki-write.monitoring.svc.cluster.local:3100/loki/api/v1/push
   telemetryEndpoint: tempo.monitoring:4317
   userServiceGRPC: user-service:9090
 linkerd:
