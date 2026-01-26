@@ -14,7 +14,7 @@ environment: local
 image:
   pullPolicy: IfNotPresent
   repository: registry.tradefence.in:5000/api-gateway
-  tag: 1.0.0.alpha.3-build.20260127-0142.0fd6fb3
+  tag: 1.0.0.alpha.3-build.20260127-0151.3006f73
 ingress:
   annotations:
     traefik.ingress.kubernetes.io/service.sticky.cookie: 'true'
@@ -73,4 +73,4 @@ service:
   port: 8080
   targetPort: 8080
   type: ClusterIP
-version: 1.0.0.alpha.3-build.20260127-0142.0fd6fb3
+version: 1.0.0.alpha.3-build.20260127-0151.3006f73
