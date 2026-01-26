@@ -1,18 +1,66 @@
-# API Gateway values for local deployment
-
 appName: api-gateway
-namespace: app
-version: "1.0.0.alpha.2"
+autoscaling:
+  enabled: false
+  maxReplicas: 10
+  minReplicas: 2
+  scaleDownStabilization: 300
+  scaleUpStabilization: 0
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+config:
+  logLevel: INFO
+containerPort: 8080
 environment: local
-# Docker image
 image:
-  repository: registry.tradefence.in:5000/api-gateway
-  tag: "1.0.0.alpha.2-build.20260126-0349.f6fccbd"
   pullPolicy: IfNotPresent
-revisionHistoryLimit: 0
-# Replica count
+  repository: registry.tradefence.in:5000/api-gateway
+  tag: 1.0.0.alpha.3-build.20260127-0142.0fd6fb3
+ingress:
+  annotations:
+    traefik.ingress.kubernetes.io/service.sticky.cookie: 'true'
+    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: 'true'
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: gateway-session
+    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: strict
+    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: 'true'
+  enabled: true
+  hosts:
+  - host: api.local.tradefence.in
+    paths:
+    - path: /
+      pathType: Prefix
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - api.local.tradefence.in
+    secretName: api-local-tradefence-tls
+internalServices:
+  logEndpoint: http://loki-write.monitoring.svc.cluster.local:3100/loki/api/v1/push
+  telemetryEndpoint: tempo.monitoring:4317
+  userServiceGRPC: user-service:9090
+linkerd:
+  inject: true
+livenessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 30
+  path: /health
+  periodSeconds: 10
+  timeoutSeconds: 5
+namespace: app
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+rateLimiter:
+  burst: 5
+  enabled: true
+  rps: 1
+  type: pod_ip
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  path: /ready
+  periodSeconds: 5
+  timeoutSeconds: 3
 replicaCount: 2
-# Resource limits and requests
 resources:
   limits:
     cpu: 1000m
@@ -20,70 +68,9 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
-# Horizontal Pod Autoscaling
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 80
-  scaleDownStabilization: 300
-  scaleUpStabilization: 0
-# Pod Disruption Budget
-podDisruptionBudget:
-  enabled: false
-  minAvailable: 1
-# Service configuration
+revisionHistoryLimit: 0
 service:
-  type: ClusterIP
   port: 8080
   targetPort: 8080
-containerPort: 8080
-# Health checks
-livenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-readinessProbe:
-  path: /ready
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-# Ingress configuration
-ingress:
-  enabled: true
-  ingressClassName: traefik
-  hosts:
-    - host: api.local.tradefence.in
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: api-local-tradefence-tls
-      hosts:
-        - api.local.tradefence.in
-  annotations:
-    # WebSocket sticky sessions
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "gateway-session"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
-    traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
-# Linkerd service mesh configuration
-linkerd:
-  inject: true
-# Application configuration
-config:
-  logLevel: "INFO"
-rateLimiter:
-  enabled: true
-  type: "pod_ip"
-  rps: 1
-  burst: 5
-internalServices:
-  userServiceGRPC: user-service:9090
-  telemetryEndpoint: tempo.monitoring:4317
-  logEndpoint: http://loki-write.monitoring.svc.cluster.local:3100/loki/api/v1/push
+  type: ClusterIP
+version: 1.0.0.alpha.3-build.20260127-0142.0fd6fb3
