@@ -2,10 +2,10 @@ apiVersion: v2
 appVersion: 1.0.0.alpha.3-build.20260127-0151.3006f73
 description: API Gateway service for TradeFence platform
 maintainers:
-- email: amal4cs@gmail.com
-  name: Amal C.S
-name: tradefence-api-gateway
+  - email: amal4cs@gmail.com
+    name: Amal C.S
+name: api-gateway
 sources:
-- git+ssh://git@git.tradefence.in:api-gateway.git
+  - git+ssh://git@git.tradefence.in:api-gateway.git
 type: application
 version: 1.0.0
