@@ -4,7 +4,7 @@ description: API Gateway service for TradeFence platform
 maintainers:
   - email: amal4cs@gmail.com
     name: Amal C.S
-name: api-gateway
+name: tradefence-api-gateway
 sources:
   - git+ssh://git@git.tradefence.in:api-gateway.git
 type: application
