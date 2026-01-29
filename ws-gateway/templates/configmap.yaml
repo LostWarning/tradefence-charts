@@ -30,7 +30,7 @@ data:
   ETCD_ENDPOINTS: "{{ .Values.etcd.endpoints | join "," }}"
 
   # nats configuration
-  NATS_URL: "{{ .Values.nats.url }}"
+  NATS_URLS: "{{ .Values.nats.url }}"
 
   {{- range $key, $value := .Values.config.custom }}
   {{ $key }}: {{ $value | quote }}

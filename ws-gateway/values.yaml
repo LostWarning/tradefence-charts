@@ -111,3 +111,6 @@ etcd:
     - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
 internalServices:
   userService: http://user-service:8080
+
+nats:
+  url: nats://nats.infrastructure.svc.cluster.local:4222
