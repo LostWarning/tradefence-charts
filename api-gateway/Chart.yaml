@@ -8,4 +8,4 @@ name: tradefence-api-gateway
 sources:
   - git+ssh://git@git.tradefence.in:api-gateway.git
 type: application
-version: 1.0.1
+version: 1.0.0
