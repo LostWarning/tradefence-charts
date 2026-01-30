@@ -62,7 +62,7 @@ database:
   postgres_1: "postgres://devuser:devpass@host.k3d.internal:5432/tradefence?sslmode=disable"
 redis:
   enabled: true
-  host: "redis.infrastructure.svc.cluster.local"
+  host: "redis-master.infrastructure.svc.cluster.local:6379"
   db: 0
   maxConnections: 50
   timeout: 5
