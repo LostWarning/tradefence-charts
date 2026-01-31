@@ -1,59 +1,71 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}
-  namespace: {{ .Values.namespace }}
+  name: {{ include "api-gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Values.appName }}
-    version: {{ .Values.version }}
+    {{- include "api-gateway.labels" . | nindent 4 }}
     environment: {{ .Values.environment }}
 spec:
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit}}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      {{- include "api-gateway.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Values.appName }}
-        version: {{ .Values.version }}
+        {{- include "api-gateway.selectorLabels" . | nindent 8 }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- if .Values.linkerd.inject }}
         linkerd.io/inject: enabled
         {{- end }}
     spec:
       # Service account for workload identity
-      serviceAccountName: {{ .Values.appName }}
+      serviceAccountName: {{ include "api-gateway.serviceAccountName" . }}
 
-      # Pod anti-affinity for HA
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # Pod Security Context
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      # Pod anti-affinity and Topology Spread
+      {{- with .Values.affinity }}
       affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - {{ .Values.appName }}
-              topologyKey: kubernetes.io/hostname
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
-      # Topology spread for zone distribution
+      {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: topology.kubernetes.io/zone
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: {{ .Values.appName }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
       containers:
-      - name: {{ .Values.appName }}
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        
+        # Container Security Context
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
 
         ports:
         - name: http
@@ -63,7 +75,7 @@ spec:
         # Environment variables from ConfigMap
         envFrom:
         - configMapRef:
-            name: {{ .Values.appName }}-config
+            name: {{ include "api-gateway.fullname" . }}-config
 
         # Additional environment variables
         env:
@@ -82,65 +94,17 @@ spec:
 
         # Health checks
         livenessProbe:
-          httpGet:
-            path: {{ .Values.livenessProbe.path }}
-            port: http
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
 
         readinessProbe:
-          httpGet:
-            path: {{ .Values.readinessProbe.path }}
-            port: http
-          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
-          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- toYaml .Values.readinessProbe | nindent 10 }}
 
         # Resource limits
         resources:
-          limits:
-            cpu: {{ .Values.resources.limits.cpu }}
-            memory: {{ .Values.resources.limits.memory }}
-          requests:
-            cpu: {{ .Values.resources.requests.cpu }}
-            memory: {{ .Values.resources.requests.memory }}
+          {{- toYaml .Values.resources | nindent 10 }}
 
-        # Graceful shutdown for WebSocket draining
+        # Graceful shutdown
         lifecycle:
           preStop:
             exec:
               command: ["/bin/sh", "-c", "sleep 30"]
-
-        # Volume mounts for nginx writable directories
-        volumeMounts:
-        - name: cache
-          mountPath: /var/cache/nginx
-        - name: run
-          mountPath: /var/run
-
-        # Security context
-        securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          runAsUser: 1000
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: false
-
-      # Volumes
-      volumes:
-      - name: cache
-        emptyDir: {}
-      - name: run
-        emptyDir: {}
-
-      # Security context for pod
-      securityContext:
-        fsGroup: 1000
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault

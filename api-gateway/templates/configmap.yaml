@@ -1,8 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.appName }}-config
-  namespace: {{ .Values.namespace }}
+  name: {{ include "api-gateway.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
 data:
 
   # Application configuration

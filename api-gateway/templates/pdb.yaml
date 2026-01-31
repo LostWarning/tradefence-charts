@@ -2,11 +2,13 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ .Values.appName }}-pdb
-  namespace: {{ .Values.namespace }}
+  name: {{ include "api-gateway.fullname" . }}-pdb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
 spec:
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      {{- include "api-gateway.selectorLabels" . | nindent 6 }}
 {{- end }}
