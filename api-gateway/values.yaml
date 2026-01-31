@@ -104,9 +104,17 @@ topologySpreadConstraints:
 # Application specific configuration
 config:
   logLevel: INFO
+  environment: local
+  rateLimiter:
+    enabled: true
+    type: pod_ip
+    burst: 5
+    rps: 1
+  internalServices:
+    userServiceGRPC: user-service:9090
+    telemetryEndpoint: tempo.monitoring:4317
   custom: {}
 
-environment: local
 containerPort: 8080
 
 linkerd:
@@ -133,16 +141,5 @@ readinessProbe:
 podDisruptionBudget:
   enabled: false
   minAvailable: 1
-
-rateLimiter:
-  enabled: true
-  type: pod_ip
-  burst: 5
-  rps: 1
-
-internalServices:
-  userServiceGRPC: user-service:9090
-  telemetryEndpoint: tempo.monitoring:4317
-  logEndpoint: ""
 
 revisionHistoryLimit: 0

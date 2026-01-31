@@ -8,17 +8,17 @@ metadata:
 data:
 
   # Application configuration
+  # Application configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
 
   # Rate limiter configuration
-  RATE_LIMITER_ENABLED: "{{ .Values.rateLimiter.enabled }}"
-  RATE_LIMITER_TYPE: "{{ .Values.rateLimiter.type }}"
-  RATE_LIMITER_BURST: "{{ .Values.rateLimiter.burst }}"
-  RATE_LIMITER_RPS: "{{ .Values.rateLimiter.rps }}"
+  RATE_LIMITER_ENABLED: "{{ .Values.config.rateLimiter.enabled }}"
+  RATE_LIMITER_TYPE: "{{ .Values.config.rateLimiter.type }}"
+  RATE_LIMITER_BURST: "{{ .Values.config.rateLimiter.burst }}"
+  RATE_LIMITER_RPS: "{{ .Values.config.rateLimiter.rps }}"
 
-  USER_SERVICE_GRPC: "{{ .Values.internalServices.userServiceGRPC }}"
-  TELEMETRY_ENDPOINT: "{{ .Values.internalServices.telemetryEndpoint }}"
-  LOG_ENDPOINT: "{{ .Values.internalServices.logEndpoint }}"
+  USER_SERVICE_GRPC: "{{ .Values.config.internalServices.userServiceGRPC }}"
+  TELEMETRY_ENDPOINT: "{{ .Values.config.internalServices.telemetryEndpoint }}"
 
   {{- range $key, $value := .Values.config.custom }}
   {{ $key }}: {{ $value | quote }}
