@@ -1,9 +1,22 @@
 # API Gateway values for local deployment
 
-appName: data-ingestion-service
-namespace: app
-version: "1.0.0.alpha.1-build.20260125-2216.3f801ea"
-environment: local
+# API Gateway values for local deployment
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Superseded by standard standard Helm naming, but kept if needed for specific logic (though usually redundant)
+# appName: data-ingestion-service
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
 # Docker image
 image:
   repository: registry.tradefence.in:5000/data-ingestion-service
@@ -36,37 +49,86 @@ podDisruptionBudget:
 # Service configuration
 service:
   type: ClusterIP
-  port: 80
-  targetPort: 8080  
-# Container ports
-grpcPort: 9090
-healthPort: 8080
+  ports:
+    http:
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+    grpc:
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+
 # Health checks
 livenessProbe:
-  path: /health
+  httpGet:
+    path: /health
+    port: health
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
+
 readinessProbe:
-  path: /ready
+  httpGet:
+    path: /ready
+    port: health
   initialDelaySeconds: 10
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
+
+# Security contexts
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Affinity and Topology
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - data-ingestion-service
+          topologyKey: kubernetes.io/hostname
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: data-ingestion-service
 # Linkerd service mesh configuration
 linkerd:
   inject: true
 # Application configuration
 config:
   logLevel: "INFO"
+  environment: local
   custom: {}
-database:
-  postgres_1: "postgres://devuser:devpass@host.k3d.internal:5432/tradefence?sslmode=disable"
-etcd:
-  endpoints:
-    - "http://etcd-0.etcd.infrastructure.svc.cluster.local:2379"
-    - "http://etcd-1.etcd.infrastructure.svc.cluster.local:2379"
-    - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
-internalServices:
-  telemetryEndpoint: tempo.monitoring:4317
+  database:
+    postgres_1: "postgres://devuser:devpass@host.k3d.internal:5432/tradefence?sslmode=disable"
+  etcd:
+    endpoints:
+      - "http://etcd-0.etcd.infrastructure.svc.cluster.local:2379"
+      - "http://etcd-1.etcd.infrastructure.svc.cluster.local:2379"
+      - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
+  internalServices:
+    telemetryEndpoint: tempo.monitoring:4317

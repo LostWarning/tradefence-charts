@@ -2,11 +2,11 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ .Values.appName }}-pdb
-  namespace: {{ .Values.namespace }}
+  name: {{ include "data-ingestion-service.fullname" . }}-pdb
+  namespace: {{ .Release.Namespace }}
 spec:
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      {{- include "data-ingestion-service.selectorLabels" . | nindent 6 }}
 {{- end }}

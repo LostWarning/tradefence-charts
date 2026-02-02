@@ -7,9 +7,9 @@ metadata:
     {{- include "api-gateway.labels" . | nindent 4 }}
 data:
 
-  # Application configuration
-  # Application configuration
+  # Monitoring configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
+  TELEMETRY_ENDPOINT: "{{ .Values.config.internalServices.telemetryEndpoint }}"
 
   # Rate limiter configuration
   RATE_LIMITER_ENABLED: "{{ .Values.config.rateLimiter.enabled }}"
@@ -17,8 +17,8 @@ data:
   RATE_LIMITER_BURST: "{{ .Values.config.rateLimiter.burst }}"
   RATE_LIMITER_RPS: "{{ .Values.config.rateLimiter.rps }}"
 
+  # Internal services configuration
   USER_SERVICE_GRPC: "{{ .Values.config.internalServices.userServiceGRPC }}"
-  TELEMETRY_ENDPOINT: "{{ .Values.config.internalServices.telemetryEndpoint }}"
 
   {{- range $key, $value := .Values.config.custom }}
   {{ $key }}: {{ $value | quote }}
