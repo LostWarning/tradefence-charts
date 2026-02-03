@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.appName }}-config
-  namespace: {{ .Values.namespace }}
+  name: {{ include "ws-gateway.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
 data:
 
   # gRPC client configuration
-  GRPC_KEEPALIVE_TIME: "{{ .Values.grpc.keepaliveTime }}"
-  GRPC_KEEPALIVE_TIMEOUT: "{{ .Values.grpc.keepaliveTimeout }}"
-  GRPC_PERMIT_WITHOUT_STREAM: "{{ .Values.grpc.permitWithoutStream }}"
-  GRPC_MAX_CONNECTION_IDLE: "{{ .Values.grpc.maxConnectionIdle }}"
-  GRPC_MAX_CONNECTION_AGE: "{{ .Values.grpc.maxConnectionAge }}"
+  GRPC_KEEPALIVE_TIME: "{{ .Values.config.grpc.keepaliveTime }}"
+  GRPC_KEEPALIVE_TIMEOUT: "{{ .Values.config.grpc.keepaliveTimeout }}"
+  GRPC_PERMIT_WITHOUT_STREAM: "{{ .Values.config.grpc.permitWithoutStream }}"
+  GRPC_MAX_CONNECTION_IDLE: "{{ .Values.config.grpc.maxConnectionIdle }}"
+  GRPC_MAX_CONNECTION_AGE: "{{ .Values.config.grpc.maxConnectionAge }}"
 
   # Application configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
@@ -19,18 +19,18 @@ data:
   WEBSOCKET_MAX_MESSAGE_SIZE: "{{ .Values.config.websocketMaxMessageSize }}"
 
   # Rate limiter configuration
-  RATE_LIMITER_ENABLED: "{{ .Values.rateLimiter.enabled }}"
-  RATE_LIMITER_TYPE: "{{ .Values.rateLimiter.type }}"
-  RATE_LIMITER_BURST: "{{ .Values.rateLimiter.burst }}"
-  RATE_LIMITER_RPS: "{{ .Values.rateLimiter.rps }}"
+  RATE_LIMITER_ENABLED: "{{ .Values.config.rateLimiter.enabled }}"
+  RATE_LIMITER_TYPE: "{{ .Values.config.rateLimiter.type }}"
+  RATE_LIMITER_BURST: "{{ .Values.config.rateLimiter.burst }}"
+  RATE_LIMITER_RPS: "{{ .Values.config.rateLimiter.rps }}"
 
-  USER_DATA_SERVICE_URL: "{{ .Values.internalServices.userService }}"
+  USER_DATA_SERVICE_URL: "{{ .Values.config.internalServices.userService }}"
 
   # etcd configuration
-  ETCD_ENDPOINTS: "{{ .Values.etcd.endpoints | join "," }}"
+  ETCD_ENDPOINTS: "{{ .Values.config.etcd.endpoints | join "," }}"
 
   # nats configuration
-  NATS_URLS: "{{ .Values.nats.url }}"
+  NATS_URLS: "{{ .Values.config.nats.url }}"
 
   {{- range $key, $value := .Values.config.custom }}
   {{ $key }}: {{ $value | quote }}

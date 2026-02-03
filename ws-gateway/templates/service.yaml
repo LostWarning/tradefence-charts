@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.appName }}
-  namespace: {{ .Values.namespace }}
+  name: {{ include "ws-gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Values.appName }}
+    {{- include "ws-gateway.labels" . | nindent 4 }}
   annotations: {}
 spec:
   type: {{ .Values.service.type }}
@@ -14,9 +14,11 @@ spec:
     clientIP:
       timeoutSeconds: 10800  # 3 hours
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: TCP
-      name: http
+    {{- range $name, $config := .Values.service.ports }}
+    - port: {{ $config.port }}
+      targetPort: {{ $config.targetPort }}
+      protocol: {{ $config.protocol }}
+      name: {{ $name }}
+    {{- end }}
   selector:
-    app: {{ .Values.appName }}
+    {{- include "ws-gateway.selectorLabels" . | nindent 4 }}

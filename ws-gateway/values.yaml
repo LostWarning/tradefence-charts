@@ -1,17 +1,22 @@
 # WebSocket Gateway values for local deployment
 
-appName: ws-gateway
-namespace: app
-version: "1.0.0.alpha.2"
-environment: local
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 # Docker image
 image:
   repository: registry.tradefence.in:5000/ws-gateway
   tag: "1.0.0.alpha.2"
   pullPolicy: IfNotPresent
+
 revisionHistoryLimit: 0
-# Replica count
 replicaCount: 2
+
 # Resource limits and requests
 resources:
   limits:
@@ -20,6 +25,7 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: false
@@ -33,31 +39,91 @@ autoscaling:
   customMetrics:
     - name: websocket_connections_per_pod
       targetAverageValue: "5000"
+
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: false
   minAvailable: 1
+
 # Service configuration
 service:
   type: ClusterIP
-  port: 8080
-  targetPort: 8080
-# Container ports
-containerPort: 8080
-metricsPort: 9090
+  ports:
+    http:
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    metrics:
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  # Session affinity for WebSocket connections
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800 # 3 hours
+
 # Health checks
 livenessProbe:
-  path: /health
+  httpGet:
+    path: /health
+    port: http
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
+
 readinessProbe:
-  path: /ready
+  httpGet:
+    path: /ready
+    port: http
   initialDelaySeconds: 10
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
+
+# Linkerd service mesh configuration
+linkerd:
+  inject: true
+
+# Security contexts
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Affinity and Topology
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - ws-gateway
+          topologyKey: kubernetes.io/hostname
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: ws-gateway
+
 # Ingress configuration
 ingress:
   enabled: true
@@ -82,35 +148,38 @@ ingress:
     traefik.ingress.kubernetes.io/service.sticky.cookie.httponly: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.secure: "true"
     traefik.ingress.kubernetes.io/service.sticky.cookie.samesite: "strict"
-# Linkerd service mesh configuration
-linkerd:
-  inject: true
-# gRPC client configuration
-grpc:
-  keepaliveTime: 10s
-  keepaliveTimeout: 3s
-  permitWithoutStream: true
-  maxConnectionIdle: 30m
-  maxConnectionAge: 1h
+
 # Application configuration
 config:
   logLevel: "INFO"
+  environment: local
   websocketReadBufferSize: 4096
   websocketWriteBufferSize: 4096
   websocketMaxMessageSize: 1048576 # 1MB
   custom: {}
-rateLimiter:
-  enabled: true
-  type: "pod_ip"
-  rps: 1
-  burst: 5
-etcd:
-  endpoints:
-    - "http://etcd-0.etcd.infrastructure.svc.cluster.local:2379"
-    - "http://etcd-1.etcd.infrastructure.svc.cluster.local:2379"
-    - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
-internalServices:
-  userService: http://user-service:8080
 
-nats:
-  url: nats://nats.infrastructure.svc.cluster.local:4222
+  # gRPC client configuration
+  grpc:
+    keepaliveTime: 10s
+    keepaliveTimeout: 3s
+    permitWithoutStream: true
+    maxConnectionIdle: 30m
+    maxConnectionAge: 1h
+
+  rateLimiter:
+    enabled: true
+    type: "pod_ip"
+    rps: 1
+    burst: 5
+
+  etcd:
+    endpoints:
+      - "http://etcd-0.etcd.infrastructure.svc.cluster.local:2379"
+      - "http://etcd-1.etcd.infrastructure.svc.cluster.local:2379"
+      - "http://etcd-2.etcd.infrastructure.svc.cluster.local:2379"
+
+  internalServices:
+    userService: http://user-service:8080
+
+  nats:
+    url: nats://nats.infrastructure.svc.cluster.local:4222

@@ -2,8 +2,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.appName }}
-  namespace: {{ .Values.namespace }}
+  name: {{ include "ws-gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   annotations:
     {{- range $key, $value := .Values.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
@@ -22,9 +22,9 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $.Values.appName }}
+                name: {{ include "ws-gateway.fullname" $ }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ $.Values.service.ports.http.port }}
         {{- end }}
   {{- end }}
   tls:

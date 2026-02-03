@@ -1,23 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}
-  namespace: {{ .Values.namespace }}
+  name: {{ include "ws-gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Values.appName }}
-    version: {{ .Values.version }}
-    environment: {{ .Values.environment }}
+    {{- include "ws-gateway.labels" . | nindent 4 }}
+    environment: {{ .Values.config.environment }}
 spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit}}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      {{- include "ws-gateway.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Values.appName }}
-        version: {{ .Values.version }}
+        {{- include "ws-gateway.selectorLabels" . | nindent 8 }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- if .Values.linkerd.inject }}
@@ -25,45 +23,30 @@ spec:
         {{- end }}
     spec:
       # Service account for workload identity
-      serviceAccountName: {{ .Values.appName }}
+      serviceAccountName: {{ include "ws-gateway.serviceAccountName" . }}
 
       # Pod anti-affinity for HA
       affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - {{ .Values.appName }}
-              topologyKey: kubernetes.io/hostname
+        {{- toYaml .Values.affinity | nindent 8 }}
 
       # Topology spread for zone distribution
       topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: topology.kubernetes.io/zone
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: {{ .Values.appName }}
+        {{- toYaml .Values.topologySpreadConstraints | nindent 8 }}
 
       containers:
-      - name: {{ .Values.appName }}
+      - name: {{ .Chart.Name }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
 
         ports:
         - name: http
-          containerPort: {{ .Values.containerPort }}
+          containerPort: {{ .Values.service.ports.http.targetPort }}
           protocol: TCP
 
         # Environment variables from ConfigMap
         envFrom:
         - configMapRef:
-            name: {{ .Values.appName }}-config
+            name: {{ include "ws-gateway.fullname" . }}-config
 
         # Additional environment variables
         env:
@@ -82,31 +65,14 @@ spec:
 
         # Health checks
         livenessProbe:
-          httpGet:
-            path: {{ .Values.livenessProbe.path }}
-            port: http
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
 
         readinessProbe:
-          httpGet:
-            path: {{ .Values.readinessProbe.path }}
-            port: http
-          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
-          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- toYaml .Values.readinessProbe | nindent 10 }}
 
         # Resource limits
         resources:
-          limits:
-            cpu: {{ .Values.resources.limits.cpu }}
-            memory: {{ .Values.resources.limits.memory }}
-          requests:
-            cpu: {{ .Values.resources.requests.cpu }}
-            memory: {{ .Values.resources.requests.memory }}
+          {{- toYaml .Values.resources | nindent 10 }}
 
         # Graceful shutdown for WebSocket draining
         lifecycle:
@@ -123,13 +89,7 @@ spec:
 
         # Security context
         securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          runAsUser: 1000
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: false
+          {{- toYaml .Values.securityContext | nindent 10 }}
 
       # Volumes
       volumes:
@@ -140,7 +100,4 @@ spec:
 
       # Security context for pod
       securityContext:
-        fsGroup: 1000
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
