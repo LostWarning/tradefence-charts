@@ -2,11 +2,11 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ .Values.appName }}-pdb
-  namespace: {{ .Values.namespace }}
+  name: {{ include "trigger-scheduler.fullname" . }}-pdb
+  namespace: {{ .Release.Namespace }}
 spec:
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      {{- include "trigger-scheduler.selectorLabels" . | nindent 6 }}
 {{- end }}

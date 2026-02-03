@@ -1,17 +1,22 @@
 # Notification Service values for local deployment
 
-appName: notification-service
-namespace: app
-version: "1.0.0.alpha.1-build.20260125-2219.c156a06"
-environment: local
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 # Docker image
 image:
   repository: registry.tradefence.in:5000/notification-service
   tag: "1.0.0.alpha.1-build.20260125-2219.c156a06"
   pullPolicy: IfNotPresent
+
 revisionHistoryLimit: 0
-# Replica count
 replicaCount: 2
+
 # Resource limits and requests
 resources:
   limits:
@@ -20,6 +25,7 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
 # Horizontal Pod Autoscaling
 autoscaling:
   enabled: false
@@ -29,38 +35,91 @@ autoscaling:
   targetMemoryUtilizationPercentage: 80
   scaleDownStabilization: 300
   scaleUpStabilization: 0
+
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: false
   minAvailable: 1
+
 # Service configuration
 service:
   type: ClusterIP
-  port: 9090
-  targetPort: 9090
-# Container ports
-grpcPort: 9090
-healthPort: 8080
+  ports:
+    grpc:
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+    health:
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+
 # Health checks
 livenessProbe:
-  path: /health
+  httpGet:
+    path: /health
+    port: health
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
+
 readinessProbe:
-  path: /ready
+  httpGet:
+    path: /ready
+    port: health
   initialDelaySeconds: 10
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
+
+# Security contexts
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Affinity and Topology
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - notification-service
+          topologyKey: kubernetes.io/hostname
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: notification-service
+
 # Linkerd service mesh configuration
 linkerd:
   inject: true
+
 # Application configuration
 config:
   logLevel: "INFO"
+  environment: local
   custom: {}
-internalServices:
-  userDataRepository:
-    address: "user-data-repository:9090"
+  internalServices:
+    userDataRepository:
+      address: "user-data-repository:9090"

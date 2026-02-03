@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.appName }}-config
-  namespace: {{ .Values.namespace }}
+  name: {{ include "notification-service.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
 data:
 
   # Application configuration
   LOG_LEVEL: "{{ .Values.config.logLevel }}"
 
   # User Data Repository configuration
-  USER_DATA_REPOSITORY_ADDR: "{{ .Values.internalServices.userDataRepository.address }}"
+  USER_DATA_REPOSITORY_ADDR: "{{ .Values.config.internalServices.userDataRepository.address }}"
 
   {{- range $key, $value := .Values.config.custom }}
   {{ $key }}: {{ $value | quote }}
